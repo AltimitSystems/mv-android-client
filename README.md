@@ -16,6 +16,8 @@ A tutorial is hosted at HBGames.org at the following URL:
 
 Usage support is provided with this tutorial.
 
+You are free to provide a translation of this tutorial with the condition that you link back to this repository and the original English translation hosted at HBGames.org.
+
 ## Bugs, issues and enhancements
 
 Please create reports for bugs related to the project at [GitHub issues](https://github.com/AltimitSystems/mv-android-client/issues)
