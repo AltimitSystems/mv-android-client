@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Copyright 2017 Altimit Systems LTD
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<resources>
+
+    <string name="mv_project_index">//android_asset/www/index.html</string>
+
+    <string name="query_webgl">webgl</string>
+    <string name="query_noaudio">noaudio</string>
+    <string name="query_showfps">showfps</string>
+
+    <string name="webview_detection_source">
+        dmFyIHdlYmdsPWZ1bmN0aW9uKCl7dHJ5e3ZhciBlPWRvY3VtZW50LmNyZWF0ZUVsZW1lbnQoImNhbnZhcyIpO3JldHVy
+        biEoIWUuZ2V0Q29udGV4dCgid2ViZ2wiKSYmIWUuZ2V0Q29udGV4dCgiZXhwZXJpbWVudGFsLXdlYmdsIikpfWNhdGNo
+        KGUpe3JldHVybiBjb25zb2xlLmxvZyhlKSwhMX19LHdlYmF1ZGlvPWZ1bmN0aW9uKCl7dHJ5e3ZhciBlPW51bGw7cmV0
+        dXJuInVuZGVmaW5lZCIhPXR5cGVvZiBBdWRpb0NvbnRleHQ/ZT1uZXcgQXVkaW9Db250ZXh0OiJ1bmRlZmluZWQiIT10
+        eXBlb2Ygd2Via2l0QXVkaW9Db250ZXh0JiYoZT1uZXcgd2Via2l0QXVkaW9Db250ZXh0KSwhIWV9Y2F0Y2goZSl7cmV0
+        dXJuIGNvbnNvbGUubG9nKGUpLCExfX07
+    </string>
+
+    <string name="webview_default_page">
+        PCFbQ0RBVEFbIDwhRE9DVFlQRSBodG1sPg0KPGh0bWw+DQo8aGVhZD4NCjxtZXRhIGNoYXJzZXQ9VVRGLTg+DQo8c3R5
+        bGU+Ym9keXtiYWNrZ3JvdW5kLWNvbG9yOmJsYWNrfSNjb3B5cmlnaHR7cG9zaXRpb246Zml4ZWQ7Ym90dG9tOjA7cmln
+        aHQ6MDtjb2xvcjp3aGl0ZTtmb250LWZhbWlseTpDb25zb2xhcyxNb25hY28sTHVjaWRhIENvbnNvbGUsTGliZXJhdGlv
+        biBNb25vLERlamFWdSBTYW5zIE1vbm8sQml0c3RyZWFtIFZlcmEgU2FucyBNb25vLENvdXJpZXIgTmV3LG1vbm9zcGFj
+        ZX08L3N0eWxlPg0KPC9oZWFkPg0KPGJvZHkgb25sb2FkPWJvb3Quc3RhcnQoKT4NCjxkaXYgaWQ9Y29weXJpZ2h0PiYj
+        MTY5OyAmIzkyMztMVElNSVQgU1lTVEVNUyBMVEQuPC9kaXY+DQo8L2JvZHk+DQo8L2h0bWw+DQpdXT4=
+    </string>
+
+    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">@color/color_primary</item>
+        <item name="colorPrimaryDark">@color/color_primary_dark</item>
+        <item name="colorAccent">@color/color_accent</item>
+    </style>
+
+</resources>

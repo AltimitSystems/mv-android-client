@@ -1,0 +1,69 @@
+/*
+ * Copyright 2017 Altimit Systems LTD
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or imp
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+apply plugin: 'com.android.application'
+
+android {
+
+    /**
+     * Advanced Configuration
+     */
+    def BACK_BUTTON_QUITS = true // Use back button to quit the app?
+
+    compileSdkVersion 26
+    buildToolsVersion "26.0.1"
+
+    defaultConfig {
+        applicationId "systems.altimit.rpgmakermv"
+        targetSdkVersion 26
+
+        versionCode 105
+        versionName "1.0.5"
+    }
+
+    buildTypes {
+        buildTypes.each {
+            it.buildConfigField "boolean", "BACK_BUTTON_QUITS", String.valueOf(BACK_BUTTON_QUITS)
+        }
+    }
+
+    productFlavors {
+        crosswalk {
+            minSdkVersion 16
+        }
+        webview {
+            minSdkVersion 14
+        }
+    }
+}
+
+repositories {
+    maven {
+        url 'https://maven.google.com'
+    }
+
+    maven {
+        url 'https://download.01.org/crosswalk/releases/crosswalk/android/maven2'
+    }
+}
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+
+    compile 'com.android.support:appcompat-v7:26.1.0'
+
+    crosswalkCompile 'org.xwalk:xwalk_core_library:23.53.589.4'
+}
