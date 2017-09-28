@@ -1,3 +1,5 @@
+![Game.apk](app/src/main/res/mipmap-xxxhdpi/app_icon.png)
+
 ## What is the MV Android Client
 
 The MV Android Client is a runtime client for the [Android&trade; operating system](https://www.android.com) intended to play games created with the [RPG Maker MV](http://www.rpgmakerweb.com) game development tool-kit.
