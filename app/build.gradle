@@ -24,7 +24,7 @@ android {
     def BACK_BUTTON_QUITS = true // Use back button to quit the app?
 
     compileSdkVersion 26
-    buildToolsVersion "26.0.1"
+    buildToolsVersion "26.0.2"
 
     defaultConfig {
         applicationId "systems.altimit.rpgmakermv"
