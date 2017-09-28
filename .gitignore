@@ -1,8 +1,4 @@
 
-### MV Android Client ###
-# MV Project path
-app/src/main/assets/
-
 # Created by https://www.gitignore.io/api/android,androidstudio,java,intellij+all,jetbrains+all,linux,macos,windows
 
 ### Android ###
