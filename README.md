@@ -32,4 +32,4 @@ The MV Android Client is under the [Apache License 2.0](https://github.com/Altim
 
 ## Contributing
 
-Please read the [contributing guide](https://github.com/AltimitSystems/mv-android-client/blob/master/CONTRIBUTING.md) and send pull requests to [https://github.com/AltimitSystems/mv-android-client](https://github.com/AltimitSystems/mv-android-client/issues).
+Please read the [contributing guide](https://github.com/AltimitSystems/mv-android-client/blob/master/CONTRIBUTING.md) and send pull requests to [https://github.com/AltimitSystems/mv-android-client](https://github.com/AltimitSystems/mv-android-client).
