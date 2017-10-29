@@ -30,8 +30,8 @@ android {
         applicationId "systems.altimit.rpgmakermv"
         targetSdkVersion 26
 
-        versionCode 105
-        versionName "1.0.5"
+        versionCode 1
+        versionName "1.0"
     }
 
     buildTypes {
