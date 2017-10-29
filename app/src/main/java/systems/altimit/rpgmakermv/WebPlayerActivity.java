@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Altimit Systems LTD
+ * Copyright (c) 2017 Altimit Community Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ import java.nio.charset.Charset;
  */
 public class WebPlayerActivity extends Activity {
 
-    private static final String CANCEL_CALL = "TouchInput._onCancel();";
+    private static final String TOUCH_INPUT_ON_CANCEL = "TouchInput._onCancel();";
 
     private Player mPlayer;
     private AlertDialog mQuitDialog;
@@ -54,10 +54,10 @@ public class WebPlayerActivity extends Activity {
             mSystemUiVisibility |= View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
             mSystemUiVisibility |= View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION;
             mSystemUiVisibility |= View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN;
-        }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            mSystemUiVisibility |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                mSystemUiVisibility |= View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+            }
         }
 
         mPlayer = PlayerHelper.create(this);
@@ -66,7 +66,10 @@ public class WebPlayerActivity extends Activity {
 
         if (!addBootstrapInterface(mPlayer)) {
             Uri.Builder projectURIBuilder = Uri.fromFile(new File(getString(R.string.mv_project_index))).buildUpon();
-            projectURIBuilder.query(getString(R.string.query_noaudio));
+            Bootstrapper.appendQuery(projectURIBuilder, getString(R.string.query_noaudio));
+            if (BuildConfig.SHOW_FPS) {
+                Bootstrapper.appendQuery(projectURIBuilder, getString(R.string.query_showfps));
+            }
             mPlayer.loadUrl(projectURIBuilder.build().toString());
         }
     }
@@ -76,7 +79,7 @@ public class WebPlayerActivity extends Activity {
         if (BuildConfig.BACK_BUTTON_QUITS) {
             mQuitDialog.show();
         } else {
-            mPlayer.evaluateJavascript(CANCEL_CALL);
+            mPlayer.evaluateJavascript(TOUCH_INPUT_ON_CANCEL);
         }
     }
 
@@ -156,14 +159,11 @@ public class WebPlayerActivity extends Activity {
 
         private static Uri.Builder appendQuery(Uri.Builder builder, String query) {
             Uri current = builder.build();
-
             String oldQuery = current.getEncodedQuery();
             if (oldQuery != null && oldQuery.length() > 0) {
                 query = oldQuery + "&" + query;
             }
-
-            builder.encodedQuery(query);
-            return builder;
+            return builder.encodedQuery(query);
         }
 
         private static final String INTERFACE = "boot";
@@ -178,7 +178,6 @@ public class WebPlayerActivity extends Activity {
 
             mPlayer = player;
             mURIBuilder = Uri.fromFile(new File(context.getString(R.string.mv_project_index))).buildUpon();
-
             mPlayer.loadData(new String(Base64.decode(context.getString(R.string.webview_default_page), Base64.DEFAULT), Charset.forName("UTF-8")));
         }
 
@@ -197,17 +196,15 @@ public class WebPlayerActivity extends Activity {
         @Override
         protected void onPrepare(boolean webgl, boolean webaudio, boolean showfps) {
             Context context = mPlayer.getContext();
-
             if (webgl) {
                 mURIBuilder = appendQuery(mURIBuilder, context.getString(R.string.query_webgl));
             }
             if (!webaudio) {
                 mURIBuilder = appendQuery(mURIBuilder, context.getString(R.string.query_noaudio));
             }
-            if (showfps) {
+            if (showfps || BuildConfig.SHOW_FPS) {
                 mURIBuilder = appendQuery(mURIBuilder, context.getString(R.string.query_showfps));
             }
-
             mPlayer.post(this);
         }
 

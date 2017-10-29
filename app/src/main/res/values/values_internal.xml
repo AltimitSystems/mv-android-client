@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-   Copyright 2017 Altimit Systems LTD
+   Copyright (c) 2017 Altimit Community Contributors
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@
         aHQ6MDtjb2xvcjp3aGl0ZTtmb250LWZhbWlseTpDb25zb2xhcyxNb25hY28sTHVjaWRhIENvbnNvbGUsTGliZXJhdGlv
         biBNb25vLERlamFWdSBTYW5zIE1vbm8sQml0c3RyZWFtIFZlcmEgU2FucyBNb25vLENvdXJpZXIgTmV3LG1vbm9zcGFj
         ZX08L3N0eWxlPg0KPC9oZWFkPg0KPGJvZHkgb25sb2FkPWJvb3Quc3RhcnQoKT4NCjxkaXYgaWQ9Y29weXJpZ2h0PiYj
-        MTY5OyAmIzkyMztMVElNSVQgU1lTVEVNUyBMVEQuPC9kaXY+DQo8L2JvZHk+DQo8L2h0bWw+DQpdXT4=
+        MTY5OyAmIzkyMztMVElNSVQgQ09NTVVOSVRZIENPTlRSSUJVVE9SUzwvZGl2Pg0KPC9ib2R5Pg0KPC9odG1sPg0KXV0+
     </string>
 
     <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">

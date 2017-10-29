@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Altimit Systems LTD
+ * Copyright (c) 2017 Altimit Community Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,8 +35,6 @@ import android.webkit.WebViewClient;
  * Created by felixjones on 28/04/2017.
  */
 public class WebPlayerView extends WebView {
-
-    private static final String TAG = WebPlayerView.class.getName();
 
     private WebPlayer mPlayer;
 

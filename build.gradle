@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Altimit Systems LTD
+ * Copyright (c) 2017 Altimit Community Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +17,17 @@
 buildscript {
     repositories {
         jcenter()
+        google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:2.3.3'
+        classpath 'com.android.tools.build:gradle:3.0.0'
     }
 }
 
 allprojects {
     repositories {
         jcenter()
+        google()
     }
 }
 

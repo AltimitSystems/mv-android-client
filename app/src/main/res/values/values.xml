@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-   Copyright 2017 Altimit Systems LTD
+   Copyright (c) 2017 Altimit Community Contributors
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@
     <!-- Icon Colors -->
     <color name="icon_background">#FFF</color>
 
-    <!-- Name -->
+    <!-- Project Name -->
     <string name="app_name">RPG Maker MV</string>
 
     <!-- Web Linking -->
