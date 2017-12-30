@@ -77,7 +77,11 @@ public class WebPlayerActivity extends Activity {
     @Override
     public void onBackPressed() {
         if (BuildConfig.BACK_BUTTON_QUITS) {
-            mQuitDialog.show();
+            if (mQuitDialog != null) {
+                mQuitDialog.show();
+            } else {
+                super.onBackPressed();
+            }
         } else {
             mPlayer.evaluateJavascript(TOUCH_INPUT_ON_CANCEL);
         }
@@ -121,27 +125,29 @@ public class WebPlayerActivity extends Activity {
             }
         }
 
-        mQuitDialog = new AlertDialog.Builder(this)
-                .setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
-                })
-                .setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    @Override
-                    public void onDismiss(DialogInterface dialog) {
-                        getWindow().getDecorView().setSystemUiVisibility(mSystemUiVisibility);
-                    }
-                })
-                .setNegativeButton("Quit", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        WebPlayerActivity.super.onBackPressed();
-                    }
-                })
-                .setMessage(quitMessage.toString())
-                .create();
+        if (quitMessage.length() > 0) {
+            mQuitDialog = new AlertDialog.Builder(this)
+                    .setPositiveButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                        }
+                    })
+                    .setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                            getWindow().getDecorView().setSystemUiVisibility(mSystemUiVisibility);
+                        }
+                    })
+                    .setNegativeButton("Quit", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            WebPlayerActivity.super.onBackPressed();
+                        }
+                    })
+                    .setMessage(quitMessage.toString())
+                    .create();
+        }
     }
 
     private boolean addBootstrapInterface(Player webView) {

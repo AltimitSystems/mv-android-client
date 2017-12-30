@@ -33,6 +33,7 @@
 
     <!-- Quit Message -->
     <string-array name="quit_message">
+        <!-- Remove all items (empty string-array) to disable quit warning -->
         <item>Do you wish to quit $1?</item>
         <item>Any unsaved progress will be lost.</item>
     </string-array>
