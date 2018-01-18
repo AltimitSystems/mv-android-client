@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Altimit Community Contributors
+ * Copyright (c) 2017-2018 Altimit Community Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -64,24 +64,24 @@ public class WebPlayerView extends WebView {
 
         setBackgroundColor(Color.BLACK);
 
-        WebSettings webSettings = getSettings();
         enableJavascript();
+
+        WebSettings webSettings = getSettings();
         webSettings.setAllowContentAccess(true);
         webSettings.setAllowFileAccess(true);
         webSettings.setLoadsImagesAutomatically(true);
         webSettings.setDomStorageEnabled(true);
         webSettings.setAppCacheEnabled(true);
         webSettings.setDatabaseEnabled(true);
+        webSettings.setDatabasePath(context.getDir("database", Context.MODE_PRIVATE).getPath());
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             webSettings.setAllowFileAccessFromFileURLs(true);
             webSettings.setAllowUniversalAccessFromFileURLs(true);
         }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            setLayerType(View.LAYER_TYPE_HARDWARE, null);
-        } else {
-            setLayerType(View.LAYER_TYPE_SOFTWARE, null);
+        
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
         }
 
         setWebChromeClient(new ChromeClient());
