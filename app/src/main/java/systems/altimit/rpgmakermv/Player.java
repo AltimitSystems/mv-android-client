@@ -26,7 +26,7 @@ public interface Player {
 
     void setKeepScreenOn();
     View getView();
-    void loadUrl(String url);
+    void loadUrl(String url, Runnable onLoad);
     void addJavascriptInterface(Object object, String name);
     Context getContext();
     void loadData(String data);

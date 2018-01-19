@@ -40,6 +40,99 @@
         MTY5OyAmIzkyMztMVElNSVQgQ09NTVVOSVRZIENPTlRSSUJVVE9SUzwvZGl2Pg0KPC9ib2R5Pg0KPC9odG1sPg0KXV0+
     </string>
 
+    <string name="webview_android_binder">
+        function androidRequire( api ) {
+            switch ( api ) {
+            case \'path\':
+                return androidRequire.path;
+            case \'fs\':
+                return androidRequire.fs;
+            case \'toast\':
+                return androidRequire.toast;
+            }
+        }
+        ( function() {
+
+            androidRequire.path = {
+
+                basename: function( path, ext ) {
+                    if ( typeof path !== \'string\' ) {
+                        throw \'path is not a string\';
+                    }
+                    if ( ext &amp;&amp; typeof ext !== \'string\' ) {
+                        throw \'ext is not a string\';
+                    }
+                    return __a_client.pathBasename( path, ext );
+                },
+
+                dirname: function( path ) {
+                    if ( typeof path !== \'string\' ) {
+                        throw \'path is not a string\';
+                    }
+                    return __a_client.pathDirname( path );
+                },
+
+                join: function() {
+                    for ( var ii = 0; ii &lt; arguments.length; ii++ ) {
+                        if ( typeof arguments[ii] !== \'string\' ) {
+                            throw \'argument \' + ii + \' is not a string\';
+                        }
+                    }
+                    return __a_client.pathJoin( arguments.length === 1 ? [arguments[0]] : Array.apply( null, arguments ) );
+                },
+
+            };
+
+            androidRequire.fs = {
+
+                existsSync: function( path ) {
+                    return __a_client.fsExistsSync( path ) == \'true\';
+                },
+
+                mkdirSync: function( path, mode ) {
+                    return __a_client.fsMkdirSync( path );
+                },
+
+                writeFileSync: function( file, data, options ) {
+                    return __a_client.fsWriteFileSync( file, data );
+                },
+
+                readFileSync: function( path, options ) {
+                    return __a_client.fsReadFileSync( path );
+                },
+
+                unlinkSync: function( path ) {
+                    return __a_client.fsUnlinkSync( path );
+                },
+
+            };
+
+            androidRequire.toast = {
+
+                toast: function( message ) {
+                    __a_client.toast( message );
+                },
+
+            };
+
+        } )();
+
+        function process() {}
+        ( function() {
+
+            process.mainModule = {};
+
+            Object.defineProperty( process.mainModule, \'filename\', {
+                get: function() {
+                    return __a_client.mainModuleFilename();
+                },
+                configurable: true
+            });
+
+        } )();
+
+    </string>
+
     <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
         <item name="colorPrimary">@color/color_primary</item>
         <item name="colorPrimaryDark">@color/color_primary_dark</item>

@@ -61,6 +61,7 @@ public class WebPlayerActivity extends Activity {
         }
 
         mPlayer = PlayerHelper.create(this);
+        mPlayer.addJavascriptInterface(new AndroidInterface(mPlayer), "__a_client");
         mPlayer.setKeepScreenOn();
         setContentView(mPlayer.getView());
 
@@ -70,7 +71,7 @@ public class WebPlayerActivity extends Activity {
             if (BuildConfig.SHOW_FPS) {
                 Bootstrapper.appendQuery(projectURIBuilder, getString(R.string.query_showfps));
             }
-            mPlayer.loadUrl(projectURIBuilder.build().toString());
+            mPlayer.loadUrl(projectURIBuilder.build().toString(), new AndroidBinder(mPlayer));
         }
     }
 
@@ -161,6 +162,23 @@ public class WebPlayerActivity extends Activity {
     /**
      *
      */
+    private static final class AndroidBinder implements Runnable {
+
+        private Player mPlayer;
+
+        private AndroidBinder(Player player) {
+            mPlayer = player;
+        }
+
+        @Override
+        public void run() {
+            mPlayer.evaluateJavascript(mPlayer.getContext().getString(R.string.webview_android_binder));
+        }
+    }
+
+    /**
+     *
+     */
     private static final class Bootstrapper extends PlayerHelper.Interface implements Runnable {
 
         private static Uri.Builder appendQuery(Uri.Builder builder, String query) {
@@ -217,7 +235,7 @@ public class WebPlayerActivity extends Activity {
         @Override
         public void run() {
             mPlayer.removeJavascriptInterface(INTERFACE);
-            mPlayer.loadUrl(mURIBuilder.build().toString());
+            mPlayer.loadUrl(mURIBuilder.build().toString(), new AndroidBinder(mPlayer));
         }
 
     }

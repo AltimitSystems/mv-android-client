@@ -31,6 +31,9 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import java.util.LinkedList;
+import java.util.Queue;
+
 /**
  * Created by felixjones on 28/04/2017.
  */
@@ -144,6 +147,11 @@ public class WebPlayerView extends WebView {
             view.setBackgroundColor(Color.WHITE);
         }
 
+        @Override
+        public void onPageFinished(WebView view, String url) {
+            mPlayer.onPageFinished();
+        }
+
     }
 
     /**
@@ -152,9 +160,11 @@ public class WebPlayerView extends WebView {
     private static final class WebPlayer implements Player {
 
         private WebPlayerView mWebView;
+        private Queue<Runnable> mOnPageFinishedActions;
 
         private WebPlayer(WebPlayerView webView) {
             mWebView = webView;
+            mOnPageFinishedActions = new LinkedList<>();
         }
 
         @Override
@@ -168,8 +178,9 @@ public class WebPlayerView extends WebView {
         }
 
         @Override
-        public void loadUrl(String url) {
+        public void loadUrl(String url, Runnable onLoad) {
             mWebView.loadUrl(url);
+            mOnPageFinishedActions.add(onLoad);
         }
 
         @Override
@@ -230,6 +241,12 @@ public class WebPlayerView extends WebView {
         @Override
         public void onDestroy() {
             mWebView.destroy();
+        }
+
+        void onPageFinished() {
+            if (!mOnPageFinishedActions.isEmpty()) {
+                mOnPageFinishedActions.remove().run();
+            }
         }
 
     }
