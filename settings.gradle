@@ -1,1 +1,2 @@
-include ':app'
+include ':app', ':BaseGameUtils'
+project(':BaseGameUtils').projectDir = new File('libraries/BaseGameUtils')

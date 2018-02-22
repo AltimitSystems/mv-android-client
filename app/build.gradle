@@ -66,6 +66,8 @@ repositories {
     maven {
         url 'https://download.01.org/crosswalk/releases/crosswalk/android/maven2'
     }
+    //google()
+    //jcenter()
 }
 
 dependencies {
@@ -74,4 +76,6 @@ dependencies {
     compile 'com.android.support:appcompat-v7:27.0.2'
 
     zz_crosswalkCompile 'org.xwalk:xwalk_core_library:23.53.589.4'
+
+    compile project(':BaseGameUtils')
 }
