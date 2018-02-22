@@ -19,12 +19,18 @@ package systems.altimit.rpgmakermv;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Base64;
 import android.view.View;
+
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.Task;
 
 import java.io.File;
 import java.nio.charset.Charset;
@@ -39,6 +45,8 @@ public class WebPlayerActivity extends Activity {
     private Player mPlayer;
     private AlertDialog mQuitDialog;
     private int mSystemUiVisibility;
+
+    private GooglePlayHandler mGooglePlayHandler = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +80,8 @@ public class WebPlayerActivity extends Activity {
             }
             mPlayer.loadUrl(projectURIBuilder.build().toString());
         }
+
+        //initGooglePlayHandler();
     }
 
     @Override
@@ -104,6 +114,10 @@ public class WebPlayerActivity extends Activity {
             mPlayer.resumeTimers();
             mPlayer.onShow();
         }
+
+        /*if (mGooglePlayHandler != null) {
+            mGooglePlayHandler.signInSilently();
+        }*/
     }
 
     @Override
@@ -112,6 +126,38 @@ public class WebPlayerActivity extends Activity {
         if (mPlayer != null) {
             mPlayer.onDestroy();
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
+
+        if (requestCode == GooglePlayHandler.RC_SIGN_IN && mGooglePlayHandler != null) {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(intent);
+
+            try {
+                GoogleSignInAccount account = task.getResult(ApiException.class);
+                mGooglePlayHandler.onConnected(account);
+            } catch (ApiException e) {
+                String message = e.getMessage();
+
+                if (message == null || message.isEmpty()) {
+                    message = "Error signing in";
+                }
+
+                mGooglePlayHandler.onDisconnected();
+
+                new AlertDialog.Builder(this)
+                        .setMessage(message)
+                        .setNeutralButton(android.R.string.ok, null)
+                        .show();
+            }
+        }
+    }
+
+    private void initGooglePlayHandler() {
+        mGooglePlayHandler = new GooglePlayHandler(this);
+        mGooglePlayHandler.signInSilently();
     }
 
     private void createQuitDialog() {
