@@ -17,8 +17,10 @@
 package systems.altimit.rpgmakermv;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -31,6 +33,7 @@ import com.google.android.gms.games.Games;
 import com.google.android.gms.games.LeaderboardsClient;
 import com.google.android.gms.games.PlayersClient;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
 /**
@@ -51,6 +54,7 @@ class GooglePlayHandler {
 
     /* Request codes used when invoking external activities */
     private static final int RC_UNUSED = 5001;
+    private static final int RC_ACHIEVEMENT_UI = 9003;
     static final int RC_SIGN_IN = 9001;
 
     private static final String TAG = GooglePlayHandler.class.getSimpleName();
@@ -72,10 +76,12 @@ class GooglePlayHandler {
         /* Create client for Google Services sign in */
         mGoogleSignInClient = GoogleSignIn.getClient(mParentActivity,
                 new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN).build());
+
+        Log.d(TAG, " ===PlayHandler initialized===");
     }
 
     /**
-     * Should only be called via parent activity's onResume function
+     * Should only be called via parent activity's onResume function or upon initialization
      */
     void signInSilently() {
         mGoogleSignInClient.silentSignIn().addOnCompleteListener(mParentActivity,
@@ -92,7 +98,8 @@ class GooglePlayHandler {
                 });
     }
 
-    private void startInteractiveSignIn() {
+    void startInteractiveSignIn() {
+        Log.d(TAG, " interactive sign in requested...");
         mParentActivity.startActivityForResult(mGoogleSignInClient.getSignInIntent(),
                 GooglePlayHandler.RC_SIGN_IN);
     }
@@ -129,6 +136,34 @@ class GooglePlayHandler {
         mAchievementsClient = null;
         mLeaderboardsClient = null;
         mPlayersClient = null;
+    }
+
+    @JavascriptInterface
+    public void unlockAchievement(String achievementIdAsString) {
+        if (mAchievementsClient != null) {
+            mAchievementsClient.unlock(achievementIdAsString);
+        }
+    }
+
+    @JavascriptInterface
+    public void incrementAchievementByAmount(String achievementIdAsString, int amount) {
+        if (mAchievementsClient != null) {
+            mAchievementsClient.increment(achievementIdAsString, amount);
+        }
+    }
+
+    @JavascriptInterface
+    public void showAchievementWindow() {
+        Log.d(TAG, "attempting to open achievement window...");
+        if (mAchievementsClient != null) {
+            mAchievementsClient.getAchievementsIntent()
+                    .addOnSuccessListener(new OnSuccessListener<Intent>() {
+                        @Override
+                        public void onSuccess(Intent intent) {
+                            mParentActivity.startActivityForResult(intent, RC_ACHIEVEMENT_UI);
+                        }
+                    });
+        }
     }
 
     private boolean isSignedIn() {

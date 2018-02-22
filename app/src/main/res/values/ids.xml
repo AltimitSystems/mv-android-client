@@ -18,18 +18,7 @@
     <!-- TODO: Replace this entire file with the ids.xml provided from the Google Play Console.
          NOTE: You can find this file by clicking the `Get Resources` link in
          the Events, Achievements, or Leaderboards menu of the Google Play Console. -->
-    <string name="app_id">YOUR_APP_ID</string>
+    <string name="app_id">APP_ID</string>
 
-    <string name="achievement_prime">YOUR_ACHIEVEMENT_PRIME_ID</string>
-    <string name="achievement_really_bored">YOUR_ACHIEVEMENT_REALLY_BORED_ID</string>
-    <string name="achievement_bored">YOUR_ACHIEVEMENT_BORED_ID</string>
-    <string name="achievement_humble">YOUR_ACHIEVEMENT_HUMBLE_ID</string>
-    <string name="achievement_arrogant">YOUR_ACHIEVEMENT_ARROGANT_ID</string>
-    <string name="achievement_leet">YOUR_ACHIEVEMENT_LEET_ID</string>
-
-    <string name="leaderboard_easy">YOUR_LEADERBOARD_EASY_ID</string>
-    <string name="leaderboard_hard">YOUR_LEADERBOARD_HARD_ID</string>
-
-    <string name="event_start">YOUR_EVENT_START</string>
-    <string name="event_number_chosen">YOUR_EVENT_NUMBER_CHOSEN</string>
+    <string name="test_chieve">ACHIEVEMENT_ID</string>
 </resources>

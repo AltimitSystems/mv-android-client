@@ -26,6 +26,7 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Base64;
 import android.view.View;
+import android.webkit.JavascriptInterface;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -34,6 +35,12 @@ import com.google.android.gms.tasks.Task;
 
 import java.io.File;
 import java.nio.charset.Charset;
+
+import static com.google.android.gms.common.api.CommonStatusCodes.API_NOT_CONNECTED;
+import static com.google.android.gms.common.api.CommonStatusCodes.DEVELOPER_ERROR;
+import static com.google.android.gms.common.api.CommonStatusCodes.INTERNAL_ERROR;
+import static com.google.android.gms.common.api.CommonStatusCodes.NETWORK_ERROR;
+import static com.google.android.gms.common.api.CommonStatusCodes.TIMEOUT;
 
 /**
  * Created by felixjones on 28/04/2017.
@@ -128,6 +135,20 @@ public class WebPlayerActivity extends Activity {
         }
     }
 
+    /* Begin Google Play API related things */
+
+    private void initGooglePlayHandler() {
+        mGooglePlayHandler = new GooglePlayHandler(this);
+
+        /* uncomment this if you want a silent sign-in */
+        //mGooglePlayHandler.signInSilently();
+
+        /* else uncomment this if you want the sign-in UI to pop up */
+        mGooglePlayHandler.startInteractiveSignIn();
+
+        mPlayer.addJavascriptInterface(mGooglePlayHandler, "GooglePlayHandler");
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
@@ -139,26 +160,49 @@ public class WebPlayerActivity extends Activity {
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 mGooglePlayHandler.onConnected(account);
             } catch (ApiException e) {
-                String message = e.getMessage();
+                int responseCode = e.getStatusCode();
+                String message = "";
 
-                if (message == null || message.isEmpty()) {
-                    message = "Error signing in";
+                /*
+                * Blank this out if you don't want alert boxes popping up on your user when things
+                * break
+                */
+                switch (responseCode) {
+                    case DEVELOPER_ERROR:
+                        message = "Developer Error! Contact the developer of this app and ask them"
+                                + "to look at their API stuff.";
+                        break;
+                    case INTERNAL_ERROR:
+                        message = "Some internal error happened when signing in; retrying should"
+                                + "fix things.";
+                        break;
+                    case NETWORK_ERROR:
+                        message = "Some network error happened when signing in; retrying should"
+                                + "fix things.";
+                        break;
+                    case TIMEOUT:
+                        message = "Timed out! Response from the server took too long, try again later";
+                        break;
+                    case API_NOT_CONNECTED:
+                        message = "Google Play's API failed to connect! Perhaps your device isn't"
+                                + "supported...";
+                        default:
+                            break;
                 }
 
                 mGooglePlayHandler.onDisconnected();
 
-                new AlertDialog.Builder(this)
-                        .setMessage(message)
-                        .setNeutralButton(android.R.string.ok, null)
-                        .show();
+                if (!message.isEmpty()) {
+                    new AlertDialog.Builder(this)
+                            .setMessage(message)
+                            .setNeutralButton(android.R.string.ok, null)
+                            .show();
+                }
             }
         }
     }
 
-    private void initGooglePlayHandler() {
-        mGooglePlayHandler = new GooglePlayHandler(this);
-        mGooglePlayHandler.signInSilently();
-    }
+    /* End Google Play API related things */
 
     private void createQuitDialog() {
         String appName = getString(R.string.app_name);

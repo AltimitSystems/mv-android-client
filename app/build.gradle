@@ -32,9 +32,9 @@ android {
         /**
          * Project Identification
          */
-        applicationId "id.application.rpgmakermv" // Change this to your applicationId.
-        versionCode 1 // Set this to a higher number for game updates.
-        versionName "1.0" // This is the version that the player sees.
+        applicationId "org.rpgm.main" // Change this to your applicationId.
+        versionCode 3 // Set this to a higher number for game updates.
+        versionName "1.0.2" // This is the version that the player sees.
 
         targetSdkVersion 27
     }
