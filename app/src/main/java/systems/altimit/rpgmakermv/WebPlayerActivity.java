@@ -33,6 +33,7 @@ import java.nio.charset.Charset;
 /**
  * Created by felixjones on 28/04/2017.
  */
+@SuppressWarnings("DefaultFileTemplate")
 public class WebPlayerActivity extends Activity {
 
     private static final String TOUCH_INPUT_ON_CANCEL = "TouchInput._onCancel();";
@@ -76,6 +77,11 @@ public class WebPlayerActivity extends Activity {
             mPlayer.loadUrl(projectURIBuilder.build().toString());
         }
 
+        /*
+        * Uncomment to allow Google Play API connections
+        * Make sure you've correctly set your stuff up on your Play Console
+        * else it will fail to connect
+        */
         //initGooglePlayHandler();
     }
 

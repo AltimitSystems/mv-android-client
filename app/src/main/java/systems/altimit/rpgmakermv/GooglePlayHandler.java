@@ -51,6 +51,7 @@ import static com.google.android.gms.common.api.CommonStatusCodes.TIMEOUT;
 
 @SuppressWarnings("DefaultFileTemplate")
 class GooglePlayHandler {
+    private static final String TAG = GooglePlayHandler.class.getSimpleName();
 
     /* Client used to sign in with Google APIs */
     private GoogleSignInClient mGoogleSignInClient;
@@ -65,8 +66,6 @@ class GooglePlayHandler {
     private static final int RC_UNUSED = 5001;
     private static final int RC_ACHIEVEMENT_UI = 9003;
     static final int RC_SIGN_IN = 9001;
-
-    private static final String TAG = GooglePlayHandler.class.getSimpleName();
 
     /* Activity that called this class */
     private Activity mParentActivity;
@@ -91,8 +90,9 @@ class GooglePlayHandler {
 
     /**
      * Should only be called via parent activity's onResume function or upon initialization
+     *
+     * @param intent should be the Intent object passed from the main activity's onActivityResult
      */
-
     void onActivityResult(Intent intent) {
         GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(intent);
 
@@ -131,17 +131,31 @@ class GooglePlayHandler {
 
             onDisconnected();
 
-            new AlertDialog.Builder(mParentActivity).setMessage(message)
-                    .setNeutralButton(android.R.string.ok, null).show();
+            Log.w(TAG, message);
+
+            /*
+            * Probably uncomment this when you've hit the release point or otherwise think
+            * you'll want your users to either report or know when one of the above occurs
+            */
+
+            /*new AlertDialog.Builder(mParentActivity).setMessage(message)
+                    .setNeutralButton(android.R.string.ok, null).show();*/
         }
     }
 
+    /**
+     * Initiate Google Play sign in with the interactive UI
+     */
     void startInteractiveSignIn() {
         Log.d(TAG, " interactive sign in requested...");
         mParentActivity.startActivityForResult(mGoogleSignInClient.getSignInIntent(),
                 RC_SIGN_IN);
     }
 
+    /**
+     * Try to sign into Google Play quietly. Failing that, fall back to the interactive
+     * sign-in
+     */
     void signInSilently() {
         mGoogleSignInClient.silentSignIn().addOnCompleteListener(mParentActivity,
                 new OnCompleteListener<GoogleSignInAccount>() {
@@ -158,7 +172,7 @@ class GooglePlayHandler {
                 });
     }
 
-    private void signOut() {
+    void signOut() {
         if (!isSignedIn()) {
             return;
         }
@@ -197,6 +211,24 @@ class GooglePlayHandler {
         mPlayersClient = null;
     }
 
+    private boolean isSignedIn() {
+        return GoogleSignIn.getLastSignedInAccount(mParentActivity) != null;
+    }
+
+    /**
+     * The outbox exists as a way to toggle whether or not achievements need to be triggered
+     * or updated the next time the user/device is able to connect to Google Play Services.
+     */
+    private class AchievementOutbox {
+        /*
+        * add boolean flags for achievements or ints for scores if needed.
+        */
+
+        boolean isEmpty() { return true; }
+    }
+
+    /* These functions serve only as bridges to the running RPGMaker MV game */
+
     @JavascriptInterface
     public void unlockAchievement(String achievementIdAsString) {
         if (mAchievementsClient != null) {
@@ -226,17 +258,5 @@ class GooglePlayHandler {
         else {
             Log.d(TAG, "mAchievementsClient was null");
         }
-    }
-
-    private boolean isSignedIn() {
-        return GoogleSignIn.getLastSignedInAccount(mParentActivity) != null;
-    }
-
-    private class AchievementOutbox {
-        /*
-        * add boolean flags for achievements or ints for scores if needed
-        */
-
-        boolean isEmpty() { return true; }
     }
 }
