@@ -48,8 +48,6 @@ import static com.google.android.gms.common.api.CommonStatusCodes.TIMEOUT;
 /**
  * Created by tehguy on 2/22/2018.
  */
-
-@SuppressWarnings("DefaultFileTemplate")
 class GooglePlayHandler {
     private static final String TAG = GooglePlayHandler.class.getSimpleName();
 
@@ -74,7 +72,8 @@ class GooglePlayHandler {
     private final AchievementOutbox mOutbox = new AchievementOutbox();
 
     /**
-     * Initializes Google API stuff
+     * Initializes the class with the parent activity and creates the sign-in client used
+     * to connect and interface with Google Play Services
      *
      * @param activity reference to the parent/calling activity
      */
@@ -89,18 +88,19 @@ class GooglePlayHandler {
     }
 
     /**
-     * Should only be called via parent activity's onResume function or upon initialization
+     * Handles Google Play Services sign-in success or failure and initializes various Services
+     * components (or nulls them in the event we cannot connect)
      *
-     * @param intent should be the Intent object passed from the main activity's onActivityResult
+     * @param intent the Intent object passed from the parent activity's onActivityResult
+     * @param alertUserOnFail whether or not an AlertDialog will be shown if we run into a problem
      */
-    void onActivityResult(Intent intent) {
+    void onActivityResult(Intent intent, boolean alertUserOnFail) {
         GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(intent);
 
         if (result.isSuccess()) {
             GoogleSignInAccount signInResult = result.getSignInAccount();
             onConnected(signInResult);
-        }
-        else {
+        } else {
             int responseCode = result.getStatus().getStatusCode();
             String message;
 
@@ -133,28 +133,23 @@ class GooglePlayHandler {
 
             Log.w(TAG, message);
 
-            /*
-            * Probably uncomment this when you've hit the release point or otherwise think
-            * you'll want your users to either report or know when one of the above occurs
-            */
-
-            /*new AlertDialog.Builder(mParentActivity).setMessage(message)
-                    .setNeutralButton(android.R.string.ok, null).show();*/
+            if (alertUserOnFail) {
+              new AlertDialog.Builder(mParentActivity).setMessage(message)
+                  .setNeutralButton(android.R.string.ok, null).show();
+            }
         }
     }
 
-    /**
-     * Initiate Google Play sign in with the interactive UI
-     */
+    /** Initiate Google Play sign in with the interactive UI */
     void startInteractiveSignIn() {
         Log.d(TAG, " interactive sign in requested...");
+
         mParentActivity.startActivityForResult(mGoogleSignInClient.getSignInIntent(),
                 RC_SIGN_IN);
     }
 
     /**
-     * Try to sign into Google Play quietly. Failing that, fall back to the interactive
-     * sign-in
+     * Try to sign into Google Play quietly. Failing that, fall back to the interactive sign-in
      */
     void signInSilently() {
         mGoogleSignInClient.silentSignIn().addOnCompleteListener(mParentActivity,
@@ -164,14 +159,17 @@ class GooglePlayHandler {
                         if (task.isSuccessful()) {
                             GoogleSignInAccount signInAccount = task.getResult();
                             onConnected(signInAccount);
-                        }
-                        else {
+                        } else {
                             startInteractiveSignIn();
                         }
                     }
                 });
     }
 
+    /**
+     * Sign out the current user and set any Service components to null, or do nothing if there
+     * was never a user signed in to begin with
+     */
     void signOut() {
         if (!isSignedIn()) {
             return;
@@ -224,10 +222,16 @@ class GooglePlayHandler {
         * add boolean flags for achievements or ints for scores if needed.
         */
 
-        boolean isEmpty() { return true; }
+        boolean isEmpty() {
+          return true;
+        }
     }
 
-    /* These functions serve only as bridges to the running RPGMaker MV game */
+    /*
+    * The following functions serve only as bridges to the running RPGMaker MV game and are to be
+    * called via Script events, Plugin Commands (if applicable), or functions within the plugins
+    * themselves (if applicable). Basically, no native code should be calling these.
+    */
 
     @JavascriptInterface
     public void unlockAchievement(String achievementIdAsString) {
@@ -245,7 +249,6 @@ class GooglePlayHandler {
 
     @JavascriptInterface
     public void showAchievementWindow() {
-        Log.d(TAG, "attempting to open achievement window...");
         if (mAchievementsClient != null) {
             mAchievementsClient.getAchievementsIntent()
                     .addOnSuccessListener(new OnSuccessListener<Intent>() {
@@ -254,9 +257,6 @@ class GooglePlayHandler {
                             mParentActivity.startActivityForResult(intent, RC_ACHIEVEMENT_UI);
                         }
                     });
-        }
-        else {
-            Log.d(TAG, "mAchievementsClient was null");
         }
     }
 }
