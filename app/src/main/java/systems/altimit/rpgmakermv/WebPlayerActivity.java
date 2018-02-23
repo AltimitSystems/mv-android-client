@@ -26,21 +26,9 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Base64;
 import android.view.View;
-import android.webkit.JavascriptInterface;
-
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.common.api.ApiException;
-import com.google.android.gms.tasks.Task;
 
 import java.io.File;
 import java.nio.charset.Charset;
-
-import static com.google.android.gms.common.api.CommonStatusCodes.API_NOT_CONNECTED;
-import static com.google.android.gms.common.api.CommonStatusCodes.DEVELOPER_ERROR;
-import static com.google.android.gms.common.api.CommonStatusCodes.INTERNAL_ERROR;
-import static com.google.android.gms.common.api.CommonStatusCodes.NETWORK_ERROR;
-import static com.google.android.gms.common.api.CommonStatusCodes.TIMEOUT;
 
 /**
  * Created by felixjones on 28/04/2017.
@@ -154,51 +142,7 @@ public class WebPlayerActivity extends Activity {
         super.onActivityResult(requestCode, resultCode, intent);
 
         if (requestCode == GooglePlayHandler.RC_SIGN_IN && mGooglePlayHandler != null) {
-            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(intent);
-
-            try {
-                GoogleSignInAccount account = task.getResult(ApiException.class);
-                mGooglePlayHandler.onConnected(account);
-            } catch (ApiException e) {
-                int responseCode = e.getStatusCode();
-                String message = "";
-
-                /*
-                * Blank this out if you don't want alert boxes popping up on your user when things
-                * break
-                */
-                switch (responseCode) {
-                    case DEVELOPER_ERROR:
-                        message = "Developer Error! Contact the developer of this app and ask them"
-                                + "to look at their API stuff.";
-                        break;
-                    case INTERNAL_ERROR:
-                        message = "Some internal error happened when signing in; retrying should"
-                                + "fix things.";
-                        break;
-                    case NETWORK_ERROR:
-                        message = "Some network error happened when signing in; retrying should"
-                                + "fix things.";
-                        break;
-                    case TIMEOUT:
-                        message = "Timed out! Response from the server took too long, try again later";
-                        break;
-                    case API_NOT_CONNECTED:
-                        message = "Google Play's API failed to connect! Perhaps your device isn't"
-                                + "supported...";
-                        default:
-                            break;
-                }
-
-                mGooglePlayHandler.onDisconnected();
-
-                if (!message.isEmpty()) {
-                    new AlertDialog.Builder(this)
-                            .setMessage(message)
-                            .setNeutralButton(android.R.string.ok, null)
-                            .show();
-                }
-            }
+            mGooglePlayHandler.onActivityResult(intent);
         }
     }
 

@@ -18,7 +18,7 @@
     <!-- TODO: Replace this entire file with the ids.xml provided from the Google Play Console.
          NOTE: You can find this file by clicking the `Get Resources` link in
          the Events, Achievements, or Leaderboards menu of the Google Play Console. -->
-    <string name="app_id">APP_ID</string>
+    <string name="app_id">YOUR_APP_ID</string>
 
-    <string name="test_chieve">ACHIEVEMENT_ID</string>
+    <string name="achievement_name">YOUR_AHCIEVEMENT_ID</string>
 </resources>

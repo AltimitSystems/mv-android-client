@@ -32,8 +32,8 @@ android {
         /**
          * Project Identification
          */
-        applicationId "org.rpgm.main" // Change this to your applicationId.
-        versionCode 3 // Set this to a higher number for game updates.
+        applicationId "id.application.rpgmakermvtest" // Change this to your applicationId.
+        versionCode 1 // Set this to a higher number for game updates.
         versionName "1.0.2" // This is the version that the player sees.
 
         targetSdkVersion 27
@@ -71,8 +71,8 @@ repositories {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
 
-    compile 'com.google.android.gms:play-services-auth:11.8.0'
-    compile 'com.google.android.gms:play-services-games:11.8.0'
+    implementation 'com.google.android.gms:play-services-auth:11.8.0'
+    implementation 'com.google.android.gms:play-services-games:11.8.0'
     compile 'com.android.support:appcompat-v7:27.0.2'
 
     zz_crosswalkCompile 'org.xwalk:xwalk_core_library:23.53.589.4'

@@ -19,14 +19,17 @@ package systems.altimit.rpgmakermv;
 import android.app.Activity;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.games.AchievementsClient;
 import com.google.android.gms.games.EventsClient;
 import com.google.android.gms.games.Games;
@@ -35,6 +38,12 @@ import com.google.android.gms.games.PlayersClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+
+import static com.google.android.gms.common.api.CommonStatusCodes.API_NOT_CONNECTED;
+import static com.google.android.gms.common.api.CommonStatusCodes.DEVELOPER_ERROR;
+import static com.google.android.gms.common.api.CommonStatusCodes.INTERNAL_ERROR;
+import static com.google.android.gms.common.api.CommonStatusCodes.NETWORK_ERROR;
+import static com.google.android.gms.common.api.CommonStatusCodes.TIMEOUT;
 
 /**
  * Created by tehguy on 2/22/2018.
@@ -83,25 +92,70 @@ class GooglePlayHandler {
     /**
      * Should only be called via parent activity's onResume function or upon initialization
      */
+
+    void onActivityResult(Intent intent) {
+        GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(intent);
+
+        if (result.isSuccess()) {
+            GoogleSignInAccount signInResult = result.getSignInAccount();
+            onConnected(signInResult);
+        }
+        else {
+            int responseCode = result.getStatus().getStatusCode();
+            String message;
+
+            switch (responseCode) {
+                case DEVELOPER_ERROR:
+                    message = "Developer Error! Contact the developer of this app and ask them"
+                            + "to look at their API stuff.";
+                    break;
+                case INTERNAL_ERROR:
+                    message = "Some internal error happened when signing in; retrying should"
+                            + "fix things.";
+                    break;
+                case NETWORK_ERROR:
+                    message = "Some network error happened when signing in; retrying should"
+                            + "fix things.";
+                    break;
+                case TIMEOUT:
+                    message = "Timed out! Response from the server took too long, try again later";
+                    break;
+                case API_NOT_CONNECTED:
+                    message = "Google Play's API failed to connect! Perhaps your device isn't"
+                            + "supported...";
+                    break;
+                default:
+                    message = "Some unknown error occurred; response code was: " + responseCode;
+                    break;
+            }
+
+            onDisconnected();
+
+            new AlertDialog.Builder(mParentActivity).setMessage(message)
+                    .setNeutralButton(android.R.string.ok, null).show();
+        }
+    }
+
+    void startInteractiveSignIn() {
+        Log.d(TAG, " interactive sign in requested...");
+        mParentActivity.startActivityForResult(mGoogleSignInClient.getSignInIntent(),
+                RC_SIGN_IN);
+    }
+
     void signInSilently() {
         mGoogleSignInClient.silentSignIn().addOnCompleteListener(mParentActivity,
                 new OnCompleteListener<GoogleSignInAccount>() {
                     @Override
                     public void onComplete(@NonNull Task<GoogleSignInAccount> task) {
                         if (task.isSuccessful()) {
-                            onConnected(task.getResult());
+                            GoogleSignInAccount signInAccount = task.getResult();
+                            onConnected(signInAccount);
                         }
                         else {
-                            onDisconnected();
+                            startInteractiveSignIn();
                         }
                     }
                 });
-    }
-
-    void startInteractiveSignIn() {
-        Log.d(TAG, " interactive sign in requested...");
-        mParentActivity.startActivityForResult(mGoogleSignInClient.getSignInIntent(),
-                GooglePlayHandler.RC_SIGN_IN);
     }
 
     private void signOut() {
@@ -120,7 +174,9 @@ class GooglePlayHandler {
                 });
     }
 
-    void onConnected(GoogleSignInAccount googleSignInAccount) {
+    private void onConnected(GoogleSignInAccount googleSignInAccount) {
+        Log.d(TAG, "API connected");
+
         mAchievementsClient = Games.getAchievementsClient(mParentActivity, googleSignInAccount);
         mLeaderboardsClient = Games.getLeaderboardsClient(mParentActivity, googleSignInAccount);
         mEventsClient = Games.getEventsClient(mParentActivity, googleSignInAccount);
@@ -132,9 +188,12 @@ class GooglePlayHandler {
         }
     }
 
-    void onDisconnected() {
+    private void onDisconnected() {
+        Log.d(TAG, "API disconnected");
+
         mAchievementsClient = null;
         mLeaderboardsClient = null;
+        mEventsClient = null;
         mPlayersClient = null;
     }
 
@@ -163,6 +222,9 @@ class GooglePlayHandler {
                             mParentActivity.startActivityForResult(intent, RC_ACHIEVEMENT_UI);
                         }
                     });
+        }
+        else {
+            Log.d(TAG, "mAchievementsClient was null");
         }
     }
 
