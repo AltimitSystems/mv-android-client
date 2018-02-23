@@ -71,6 +71,9 @@ repositories {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
 
+    implementation 'com.google.android.gms:play-services-auth:11.8.0'
+    implementation 'com.google.android.gms:play-services-games:11.8.0'
+
     compile 'com.android.support:appcompat-v7:27.0.2'
 
     zz_crosswalkCompile 'org.xwalk:xwalk_core_library:23.53.589.4'

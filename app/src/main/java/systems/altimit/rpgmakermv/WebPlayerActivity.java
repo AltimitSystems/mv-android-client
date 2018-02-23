@@ -19,6 +19,7 @@ package systems.altimit.rpgmakermv;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -39,6 +40,8 @@ public class WebPlayerActivity extends Activity {
     private Player mPlayer;
     private AlertDialog mQuitDialog;
     private int mSystemUiVisibility;
+
+    private GooglePlayHandler mGooglePlayHandler = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,6 +116,31 @@ public class WebPlayerActivity extends Activity {
             mPlayer.onDestroy();
         }
     }
+
+    /* Begin Google Play API related things */
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+      super.onActivityResult(requestCode, resultCode, intent);
+
+      if (requestCode == GooglePlayHandler.RC_SIGN_IN && mGooglePlayHandler != null) {
+        mGooglePlayHandler.onActivityResult(intent, false);
+      }
+    }
+
+    private void initGooglePlayHandler() {
+      mGooglePlayHandler = new GooglePlayHandler(this);
+
+      /* uncomment this if you want a silent sign-in */
+      //mGooglePlayHandler.signInSilently();
+
+      /* else uncomment this if you want the sign-in UI to pop up */
+      mGooglePlayHandler.startInteractiveSignIn();
+
+      mPlayer.addJavascriptInterface(mGooglePlayHandler, "GooglePlayHandler");
+    }
+
+    /* End Google Play API related things */
 
     private void createQuitDialog() {
         String appName = getString(R.string.app_name);
