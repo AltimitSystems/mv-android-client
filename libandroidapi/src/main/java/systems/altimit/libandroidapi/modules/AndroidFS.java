@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Altimit Community Contributors
+ * Copyright (c) 2018 Altimit Community Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package systems.altimit.rpgmakermv;
+package systems.altimit.libandroidapi.modules;
 
-import android.net.Uri;
 import android.webkit.JavascriptInterface;
 
 import java.io.BufferedReader;
@@ -27,41 +26,11 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 
 /**
- * Created by felixjones on 19/01/2018.
+ * Created by felixjones on 24/02/2018.
  */
-public class AndroidInterface {
+public class AndroidFS {
 
-    private Player mPlayer;
-
-    public AndroidInterface(Player player) {
-        mPlayer = player;
-    }
-
-    @JavascriptInterface
-    public String mainModuleFilename() {
-        return mPlayer.getContext().getFilesDir().getAbsolutePath();
-    }
-
-    @JavascriptInterface
-    public String pathBasename(String path, String ext) {
-        String basename = new Uri.Builder().appendEncodedPath(path).build().getLastPathSegment();
-        int extensionIndex = basename.lastIndexOf(ext);
-        return extensionIndex > -1 ? basename.substring(0, extensionIndex) : basename;
-    }
-
-    @JavascriptInterface
-    public String pathDirname(String path) {
-        return new Uri.Builder().appendEncodedPath(path).build().getPath();
-    }
-
-    @JavascriptInterface
-    public String pathJoin(String... paths) {
-        Uri.Builder builder = new Uri.Builder();
-        for (String path : paths) {
-            builder.appendEncodedPath(path);
-        }
-        return builder.build().toString();
-    }
+    public static final String INTERFACE_NAME = "__android_api_fs";
 
     @JavascriptInterface
     public String fsExistsSync(String path) {

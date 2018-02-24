@@ -16,6 +16,11 @@
 
 apply plugin: 'com.android.application'
 
+/**
+ * Extensions
+ */
+def EXTENSIONS = ['libandroidapi']
+
 android {
 
     /**
@@ -40,9 +45,10 @@ android {
     }
 
     buildTypes {
-        buildTypes.each {
-            it.buildConfigField "boolean", "BACK_BUTTON_QUITS", String.valueOf(BACK_BUTTON_QUITS)
-            it.buildConfigField "boolean", "SHOW_FPS",          String.valueOf(SHOW_FPS)
+        buildTypes.each { buildType ->
+            buildType.buildConfigField "boolean",  "BACK_BUTTON_QUITS", String.valueOf(BACK_BUTTON_QUITS)
+            buildType.buildConfigField "boolean",  "SHOW_FPS",          String.valueOf(SHOW_FPS)
+            buildType.buildConfigField "String[]", "EXTENSIONS",        "{" + EXTENSIONS.collect {"\"systems.altimit.${it}\""}.join(",")  + "}"
         }
     }
 
@@ -71,7 +77,11 @@ repositories {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
 
-    compile 'com.android.support:appcompat-v7:27.0.2'
+    implementation 'com.android.support:appcompat-v7:27.0.2'
 
-    zz_crosswalkCompile 'org.xwalk:xwalk_core_library:23.53.589.4'
+    zz_crosswalkImplementation 'org.xwalk:xwalk_core_library:23.53.589.4'
+
+    EXTENSIONS.each { extension ->
+        implementation project(':' + extension)
+    }
 }

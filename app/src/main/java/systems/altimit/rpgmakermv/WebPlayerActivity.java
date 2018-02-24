@@ -28,6 +28,9 @@ import android.view.View;
 
 import java.io.File;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by felixjones on 28/04/2017.
@@ -37,6 +40,7 @@ public class WebPlayerActivity extends Activity {
     private static final String TOUCH_INPUT_ON_CANCEL = "TouchInput._onCancel();";
 
     private Player mPlayer;
+    private List<String> mExtensionSources;
     private AlertDialog mQuitDialog;
     private int mSystemUiVisibility;
 
@@ -61,17 +65,25 @@ public class WebPlayerActivity extends Activity {
         }
 
         mPlayer = PlayerHelper.create(this);
-        mPlayer.addJavascriptInterface(new AndroidInterface(mPlayer), "__a_client");
+        mExtensionSources = new ArrayList<>();
+
         mPlayer.setKeepScreenOn();
         setContentView(mPlayer.getView());
 
-        if (!addBootstrapInterface(mPlayer)) {
+        for (ExtensionManager.Extension extension : ExtensionManager.getExtensions(this)) {
+            for (Map.Entry<String, Object> entry : extension.getJavascriptInterfaces().entrySet()) {
+                mPlayer.addJavascriptInterface(entry.getValue(), entry.getKey());
+            }
+            mExtensionSources.addAll(extension.getJavascriptSources());
+        }
+
+        if (!addBootstrapInterface(mPlayer, mExtensionSources)) {
             Uri.Builder projectURIBuilder = Uri.fromFile(new File(getString(R.string.mv_project_index))).buildUpon();
             Bootstrapper.appendQuery(projectURIBuilder, getString(R.string.query_noaudio));
             if (BuildConfig.SHOW_FPS) {
                 Bootstrapper.appendQuery(projectURIBuilder, getString(R.string.query_showfps));
             }
-            mPlayer.loadUrl(projectURIBuilder.build().toString(), new AndroidBinder(mPlayer));
+            mPlayer.loadUrl(projectURIBuilder.build().toString(), new SourceListEvaluator(mPlayer, mExtensionSources));
         }
     }
 
@@ -151,9 +163,9 @@ public class WebPlayerActivity extends Activity {
         }
     }
 
-    private boolean addBootstrapInterface(Player webView) {
+    private static boolean addBootstrapInterface(Player player, List<String> sources) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            new Bootstrapper(webView);
+            new Bootstrapper(player, sources);
             return true;
         }
         return false;
@@ -162,17 +174,21 @@ public class WebPlayerActivity extends Activity {
     /**
      *
      */
-    private static final class AndroidBinder implements Runnable {
+    private static final class SourceListEvaluator implements Runnable {
 
         private Player mPlayer;
+        private List<String> mSources;
 
-        private AndroidBinder(Player player) {
+        private SourceListEvaluator(Player player, List<String> sourceList) {
             mPlayer = player;
+            mSources = sourceList;
         }
 
         @Override
         public void run() {
-            mPlayer.evaluateJavascript(mPlayer.getContext().getString(R.string.webview_android_binder));
+            for (String source : mSources) {
+                mPlayer.evaluateJavascript(source);
+            }
         }
     }
 
@@ -194,13 +210,15 @@ public class WebPlayerActivity extends Activity {
         private static final String PREPARE_FUNC = "prepare( webgl(), webaudio(), false )";
 
         private Player mPlayer;
+        private List<String> mExtensionSources;
         private Uri.Builder mURIBuilder;
 
-        private Bootstrapper(Player player) {
+        private Bootstrapper(Player player, List<String> sourceList) {
             Context context = player.getContext();
             player.addJavascriptInterface(this, Bootstrapper.INTERFACE);
 
             mPlayer = player;
+            mExtensionSources = sourceList;
             mURIBuilder = Uri.fromFile(new File(context.getString(R.string.mv_project_index))).buildUpon();
             mPlayer.loadData(new String(Base64.decode(context.getString(R.string.webview_default_page), Base64.DEFAULT), Charset.forName("UTF-8")));
         }
@@ -235,7 +253,7 @@ public class WebPlayerActivity extends Activity {
         @Override
         public void run() {
             mPlayer.removeJavascriptInterface(INTERFACE);
-            mPlayer.loadUrl(mURIBuilder.build().toString(), new AndroidBinder(mPlayer));
+            mPlayer.loadUrl(mURIBuilder.build().toString(), new SourceListEvaluator(mPlayer, mExtensionSources));
         }
 
     }
