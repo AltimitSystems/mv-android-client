@@ -19,6 +19,7 @@ package systems.altimit.rpgmakermv;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -29,6 +30,7 @@ import android.view.View;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -40,7 +42,7 @@ public class WebPlayerActivity extends Activity {
     private static final String TOUCH_INPUT_ON_CANCEL = "TouchInput._onCancel();";
 
     private Player mPlayer;
-    private List<String> mExtensionSources;
+    private List<ExtensionManager.Extension> mExtensions;
     private AlertDialog mQuitDialog;
     private int mSystemUiVisibility;
 
@@ -65,25 +67,26 @@ public class WebPlayerActivity extends Activity {
         }
 
         mPlayer = PlayerHelper.create(this);
-        mExtensionSources = new ArrayList<>();
+        mExtensions = ExtensionManager.getExtensions(this);
 
         mPlayer.setKeepScreenOn();
         setContentView(mPlayer.getView());
 
-        for (ExtensionManager.Extension extension : ExtensionManager.getExtensions(this)) {
+        List<String> extensionSources = new ArrayList<>();
+        for (ExtensionManager.Extension extension : mExtensions) {
             for (Map.Entry<String, Object> entry : extension.getJavascriptInterfaces().entrySet()) {
                 mPlayer.addJavascriptInterface(entry.getValue(), entry.getKey());
             }
-            mExtensionSources.addAll(extension.getJavascriptSources());
+            extensionSources.addAll(Arrays.asList(extension.getJavascriptSources()));
         }
 
-        if (!addBootstrapInterface(mPlayer, mExtensionSources)) {
+        if (!addBootstrapInterface(mPlayer, extensionSources)) {
             Uri.Builder projectURIBuilder = Uri.fromFile(new File(getString(R.string.mv_project_index))).buildUpon();
             Bootstrapper.appendQuery(projectURIBuilder, getString(R.string.query_noaudio));
             if (BuildConfig.SHOW_FPS) {
                 Bootstrapper.appendQuery(projectURIBuilder, getString(R.string.query_showfps));
             }
-            mPlayer.loadUrl(projectURIBuilder.build().toString(), new SourceListEvaluator(mPlayer, mExtensionSources));
+            mPlayer.loadUrl(projectURIBuilder.build().toString(), new SourceListEvaluator(mPlayer, extensionSources));
         }
     }
 
@@ -124,6 +127,15 @@ public class WebPlayerActivity extends Activity {
         super.onDestroy();
         if (mPlayer != null) {
             mPlayer.onDestroy();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        for (ExtensionManager.Extension extension : mExtensions) {
+            if (extension.respondsToRequestCode(requestCode)) {
+                extension.onActivityResult(requestCode, resultCode, data);
+            }
         }
     }
 

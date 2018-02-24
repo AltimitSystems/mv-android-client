@@ -17,6 +17,7 @@
 package systems.altimit.rpgmakermv;
 
 import android.content.Context;
+import android.content.Intent;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -54,11 +55,15 @@ public class ExtensionManager {
     public static class Extension {
 
         private Map<String, Object> mJavascriptInterfaces;
-        private List<String> mJavascriptSources;
+        private String[] mJavascriptSources;
+        private int[] mRequestCodes;
+        private Object mResponder;
 
         private Extension(Object instance) {
             mJavascriptInterfaces = new HashMap<>();
-            mJavascriptSources = new ArrayList<>();
+            mJavascriptSources = new String[] {};
+            mRequestCodes = new int[] {};
+            mResponder = instance;
 
             try {
                 loadJavascriptInterfaces(instance);
@@ -70,26 +75,70 @@ public class ExtensionManager {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+            try {
+                loadActivityRequestCodes(instance);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
         public Map<String, Object> getJavascriptInterfaces() {
             return mJavascriptInterfaces;
         }
 
-        public List<String> getJavascriptSources() {
+        public String[] getJavascriptSources() {
             return mJavascriptSources;
         }
 
-        private void loadJavascriptInterfaces(Object instance) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-            Method getJavascriptInterfaces = instance.getClass().getMethod("getJavascriptInterfaces");
-            //noinspection unchecked
-            mJavascriptInterfaces = (Map<String, Object>) getJavascriptInterfaces.invoke(instance);
+        public boolean respondsToRequestCode(int activityRequestCode) {
+            if (mRequestCodes == null) {
+                return false;
+            }
+            for (int code : mRequestCodes) {
+                if (code == activityRequestCode) {
+                    return true;
+                }
+            }
+            return false;
         }
 
-        private void loadJavascriptSources(Object instance) throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-            Method getJavascriptSources = instance.getClass().getMethod("getJavascriptSources");
-            //noinspection unchecked
-            mJavascriptSources = (List<String>) getJavascriptSources.invoke(instance);
+        public void onActivityResult(int requestCode, int resultCode, Intent data) {
+            try {
+                Method onActivityResult = mResponder.getClass().getMethod("onActivityResult", Integer.TYPE, Integer.TYPE, Intent.class);
+                onActivityResult.invoke(mResponder, requestCode, resultCode, data);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        private void loadJavascriptInterfaces(Object instance) throws InvocationTargetException, IllegalAccessException {
+            try {
+                Method getJavascriptInterfaces = instance.getClass().getMethod("getJavascriptInterfaces");
+                //noinspection unchecked
+                mJavascriptInterfaces = (Map<String, Object>) getJavascriptInterfaces.invoke(instance);
+            } catch (NoSuchMethodException e) {
+                // Ignore NoSuchMethodException
+            }
+        }
+
+        private void loadJavascriptSources(Object instance) throws InvocationTargetException, IllegalAccessException {
+            try {
+                Method getJavascriptSources = instance.getClass().getMethod("getJavascriptSources");
+                //noinspection unchecked
+                mJavascriptSources = (String[]) getJavascriptSources.invoke(instance);
+            } catch (NoSuchMethodException e) {
+                // Ignore NoSuchMethodException
+            }
+        }
+
+        private void loadActivityRequestCodes(Object instance) throws InvocationTargetException, IllegalAccessException {
+            try {
+                Method getRequestCodes = instance.getClass().getMethod("getRequestCodes");
+                //noinspection unchecked
+                mRequestCodes = (int[]) getRequestCodes.invoke(instance);
+            } catch (NoSuchMethodException e) {
+                // Ignore NoSuchMethodException
+            }
         }
 
     }

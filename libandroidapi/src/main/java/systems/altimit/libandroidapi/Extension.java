@@ -17,12 +17,15 @@
 package systems.altimit.libandroidapi;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.webkit.JavascriptInterface;
 
-import java.util.ArrayList;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import systems.altimit.libandroidapi.modules.AndroidFS;
@@ -36,22 +39,22 @@ public class Extension {
     private static final String INTERFACE_NAME = "__android_api";
 
     private Map<String, Object> mInterfaces;
-    private List<String> mSources;
+    private String[] mSources;
 
     private String mModuleFilename;
 
     public Extension(Context context) {
         mInterfaces = new HashMap<>();
-        mSources = new ArrayList<>();
-
         mInterfaces.put(INTERFACE_NAME, this);
         mInterfaces.put(AndroidPath.INTERFACE_NAME, new AndroidPath());
         mInterfaces.put(AndroidFS.INTERFACE_NAME, new AndroidFS());
 
         Resources resources = context.getResources();
-        mSources.add(Util.readInputStream(resources.openRawResource(R.raw.android_require)));
-        mSources.add(Util.readInputStream(resources.openRawResource(R.raw.android_path)));
-        mSources.add(Util.readInputStream(resources.openRawResource(R.raw.android_fs)));
+        mSources = new String[] {
+            readInputStream(resources.openRawResource(R.raw.android_require)),
+            readInputStream(resources.openRawResource(R.raw.android_path)),
+            readInputStream(resources.openRawResource(R.raw.android_fs))
+        };
 
         mModuleFilename = context.getFilesDir().getAbsolutePath();
     }
@@ -65,8 +68,40 @@ public class Extension {
         return mInterfaces;
     }
 
-    public List<String> getJavascriptSources() {
+    public String[] getJavascriptSources() {
         return mSources;
+    }
+
+    public int[] getRequestCodes() {
+        return null; // Does not respond to request codes
+    }
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Does not respond to request codes
+    }
+
+    private static String readInputStream(InputStream inputStream) {
+        StringBuilder text = new StringBuilder();
+        BufferedReader br = null;
+        try {
+            br = new BufferedReader(new InputStreamReader(inputStream));
+            String line;
+            while ((line = br.readLine()) != null) {
+                text.append(line);
+                text.append('\n');
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (br != null) {
+                    br.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return text.toString();
     }
 
 }
