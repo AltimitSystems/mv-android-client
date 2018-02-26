@@ -71,12 +71,14 @@ public class WebPlayerActivity extends Activity {
         mPlayer = PlayerHelper.create(this);
 
         mExtensions = new ArrayList<>();
-        try {
-            for (String extensionClass : BuildConfig.EXTENSION_CLASSES) {
-                mExtensions.add((AbstractExtension) Class.forName(extensionClass).getConstructor(Context.class).newInstance(this));
+        if ("webview".equals(BuildConfig.FLAVOR)) {
+            try {
+                for (String extensionClass : BuildConfig.EXTENSION_CLASSES) {
+                    mExtensions.add((AbstractExtension) Class.forName(extensionClass).getConstructor(Context.class).newInstance(this));
+                }
+            } catch (Exception e) {
+                e.printStackTrace(); // A bad extension will fail and print a stack-trace
             }
-        } catch (Exception e) {
-            e.printStackTrace(); // A bad extension will fail and print a stack-trace
         }
 
         mPlayer.setKeepScreenOn();

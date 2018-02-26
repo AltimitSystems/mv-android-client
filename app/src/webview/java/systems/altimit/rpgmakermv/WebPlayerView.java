@@ -179,8 +179,8 @@ public class WebPlayerView extends WebView {
 
         @Override
         public void loadUrl(String url, Runnable onLoad) {
-            mWebView.loadUrl(url);
             mOnPageFinishedActions.add(onLoad);
+            mWebView.loadUrl(url);
         }
 
         @Override
@@ -244,7 +244,7 @@ public class WebPlayerView extends WebView {
         }
 
         void onPageFinished() {
-            if (!mOnPageFinishedActions.isEmpty()) {
+            while (!mOnPageFinishedActions.isEmpty()) {
                 mOnPageFinishedActions.remove().run();
             }
         }

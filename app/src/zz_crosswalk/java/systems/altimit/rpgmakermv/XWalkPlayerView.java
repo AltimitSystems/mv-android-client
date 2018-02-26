@@ -20,12 +20,19 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Color;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.View;
+import android.webkit.JavascriptInterface;
 
+import org.xwalk.core.XWalkResourceClient;
 import org.xwalk.core.XWalkSettings;
 import org.xwalk.core.XWalkView;
+
+import java.lang.reflect.Method;
+import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * Created by felixjones on 12/05/2017.
@@ -60,6 +67,8 @@ public class XWalkPlayerView extends XWalkView {
 
         webSettings.setAllowFileAccessFromFileURLs(true);
         webSettings.setAllowUniversalAccessFromFileURLs(true);
+
+        setResourceClient(new ResourceClient(this));
     }
 
     @Override
@@ -95,12 +104,31 @@ public class XWalkPlayerView extends XWalkView {
     /**
      *
      */
+    private class ResourceClient extends XWalkResourceClient {
+
+        private ResourceClient(XWalkView view) {
+            super(view);
+        }
+
+        @Override
+        public void onLoadFinished(XWalkView view, String url) {
+            mPlayer.onPageFinished();
+        }
+
+    }
+
+    /**
+     *
+     */
     private static final class XWalkPlayer implements Player {
 
         private XWalkView mXWalkView;
+        private Queue<Runnable> mOnPageFinishedActions;
 
         private XWalkPlayer(XWalkView xWalkView) {
             mXWalkView = xWalkView;
+
+            mOnPageFinishedActions = new LinkedList<>();
         }
 
         @Override
@@ -114,12 +142,20 @@ public class XWalkPlayerView extends XWalkView {
         }
 
         @Override
-        public void loadUrl(String url) {
+        public void loadUrl(String url, Runnable onLoad) {
+            mOnPageFinishedActions.add(onLoad);
             mXWalkView.loadUrl(url);
         }
 
         @Override
         public void addJavascriptInterface(Object object, String name) {
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN) {
+                for (Method method : object.getClass().getMethods()) {
+                    if (method.isAnnotationPresent(JavascriptInterface.class)) {
+
+                    }
+                }
+            }
             mXWalkView.addJavascriptInterface(object, name);
         }
 
@@ -171,6 +207,12 @@ public class XWalkPlayerView extends XWalkView {
         @Override
         public void onDestroy() {
             mXWalkView.onDestroy();
+        }
+
+        void onPageFinished() {
+            while (!mOnPageFinishedActions.isEmpty()) {
+                mOnPageFinishedActions.remove().run();
+            }
         }
 
     }
