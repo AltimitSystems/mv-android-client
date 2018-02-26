@@ -14,20 +14,19 @@
  * limitations under the License.
  */
 
-function androidRequire( api ) {
-    switch ( api ) {
-    case 'path':
-        return androidRequire.path;
-    case 'fs':
-        return androidRequire.fs;
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 27
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 27
     }
 }
 
-function process() {}
-( function() {
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    process.mainModule = {
-        filename: __android_api.mainModuleFilename()
-    };
-
-} )();
+    implementation 'com.android.support:appcompat-v7:27.0.2'
+}

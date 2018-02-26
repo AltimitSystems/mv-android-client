@@ -16,32 +16,54 @@
 
 ( function() {
 
+    var _basenames = {};
+    var _dirnames = {};
+    var _joins = {};
+
     androidRequire.path = {
 
         basename: function( path, ext ) {
-            if ( typeof path !== 'string' ) {
-                throw 'path is not a string';
+            if ( !_basenames[path] ) {
+                _basenames[path] = {};
             }
-            if ( ext && typeof ext !== 'string' ) {
-                throw 'ext is not a string';
+            if ( !_basenames[path][ext] ) {
+                if ( typeof path !== 'string' ) {
+                    throw 'path is not a string';
+                }
+                if ( ext && typeof ext !== 'string' ) {
+                    throw 'ext is not a string';
+                }
+                _basenames[path][ext] = {
+                    value:__android_api_path.pathBasename( path, ext )
+                }
             }
-            return __android_api_path.pathBasename( path, ext );
+            return _basenames[path][ext].value;
         },
 
         dirname: function( path ) {
-            if ( typeof path !== 'string' ) {
-                throw 'path is not a string';
+            if ( !_dirnames[path] ) {
+                if ( typeof path !== 'string' ) {
+                    throw 'path is not a string';
+                }
+                _dirnames[path] = {
+                    value: __android_api_path.pathDirname( path )
+                }
             }
-            return __android_api_path.pathDirname( path );
+            return _dirnames[path].value;
         },
 
         join: function() {
-            for ( var ii = 0; ii < arguments.length; ii++ ) {
-                if ( typeof arguments[ii] !== 'string' ) {
-                    throw 'argument ' + ii + ' is not a string';
+            if ( !_joins[arguments] ) {
+                for ( var ii = 0; ii < arguments.length; ii++ ) {
+                    if ( typeof arguments[ii] !== 'string' ) {
+                        throw 'argument ' + ii + ' is not a string';
+                    }
+                }
+                _joins[arguments] = {
+                    value: __android_api_path.pathJoin( arguments.length === 1 ? [arguments[0]] : Array.apply( null, arguments ) )
                 }
             }
-            return __android_api_path.pathJoin( arguments.length === 1 ? [arguments[0]] : Array.apply( null, arguments ) );
+            return _joins[arguments].value;
         },
 
     };

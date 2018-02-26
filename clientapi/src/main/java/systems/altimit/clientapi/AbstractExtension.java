@@ -14,20 +14,27 @@
  * limitations under the License.
  */
 
-function androidRequire( api ) {
-    switch ( api ) {
-    case 'path':
-        return androidRequire.path;
-    case 'fs':
-        return androidRequire.fs;
+package systems.altimit.clientapi;
+
+import android.content.Context;
+import android.content.Intent;
+import android.support.annotation.NonNull;
+
+import java.util.Map;
+
+/**
+ * Created by felixjones on 26/02/2018.
+ */
+public abstract class AbstractExtension {
+
+    public AbstractExtension(@NonNull Context context) {}
+
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // Do nothing by default
     }
+
+    public abstract Map<String, Object> getJavascriptInterfaces();
+
+    public abstract String[] getJavascriptSources();
+
 }
-
-function process() {}
-( function() {
-
-    process.mainModule = {
-        filename: __android_api.mainModuleFilename()
-    };
-
-} )();

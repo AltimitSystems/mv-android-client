@@ -17,8 +17,8 @@
 package systems.altimit.libandroidapi;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
+import android.support.annotation.NonNull;
 import android.webkit.JavascriptInterface;
 
 import java.io.BufferedReader;
@@ -28,13 +28,14 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
+import systems.altimit.clientapi.AbstractExtension;
 import systems.altimit.libandroidapi.modules.AndroidFS;
 import systems.altimit.libandroidapi.modules.AndroidPath;
 
 /**
  * Created by felixjones on 24/02/2018.
  */
-public class Extension {
+public class AndroidAPI extends AbstractExtension {
 
     private static final String INTERFACE_NAME = "__android_api";
 
@@ -43,7 +44,8 @@ public class Extension {
 
     private String mModuleFilename;
 
-    public Extension(Context context) {
+    public AndroidAPI(Context context) {
+        super(context);
         mInterfaces = new HashMap<>();
         mInterfaces.put(INTERFACE_NAME, this);
         mInterfaces.put(AndroidPath.INTERFACE_NAME, new AndroidPath());
@@ -51,12 +53,22 @@ public class Extension {
 
         Resources resources = context.getResources();
         mSources = new String[] {
-            readInputStream(resources.openRawResource(R.raw.android_require)),
-            readInputStream(resources.openRawResource(R.raw.android_path)),
-            readInputStream(resources.openRawResource(R.raw.android_fs))
-        };
+                Util.readInputStream(resources.openRawResource(R.raw.android_require)),
+                Util.readInputStream(resources.openRawResource(R.raw.android_path)),
+                Util.readInputStream(resources.openRawResource(R.raw.android_fs))
+            };
 
         mModuleFilename = context.getFilesDir().getAbsolutePath();
+    }
+
+    @Override
+    public Map<String, Object> getJavascriptInterfaces() {
+        return mInterfaces;
+    }
+
+    @Override
+    public String[] getJavascriptSources() {
+        return mSources;
     }
 
     @JavascriptInterface
@@ -64,44 +76,36 @@ public class Extension {
         return mModuleFilename;
     }
 
-    public Map<String, Object> getJavascriptInterfaces() {
-        return mInterfaces;
-    }
+    /**
+     *
+     */
+    private static final class Util {
 
-    public String[] getJavascriptSources() {
-        return mSources;
-    }
-
-    public int[] getRequestCodes() {
-        return null; // Does not respond to request codes
-    }
-
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // Does not respond to request codes
-    }
-
-    private static String readInputStream(InputStream inputStream) {
-        StringBuilder text = new StringBuilder();
-        BufferedReader br = null;
-        try {
-            br = new BufferedReader(new InputStreamReader(inputStream));
-            String line;
-            while ((line = br.readLine()) != null) {
-                text.append(line);
-                text.append('\n');
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
+        @NonNull
+        private static String readInputStream(InputStream inputStream) {
+            StringBuilder text = new StringBuilder();
+            BufferedReader br = null;
             try {
-                if (br != null) {
-                    br.close();
+                br = new BufferedReader(new InputStreamReader(inputStream));
+                String line;
+                while ((line = br.readLine()) != null) {
+                    text.append(line);
+                    text.append('\n');
                 }
             } catch (IOException e) {
                 e.printStackTrace();
+            } finally {
+                try {
+                    if (br != null) {
+                        br.close();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+            return text.toString();
         }
-        return text.toString();
+
     }
 
 }

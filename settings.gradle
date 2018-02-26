@@ -1,1 +1,1 @@
-include ':app', ':libandroidapi'
+include ':app', ':libandroidapi', ':clientapi'

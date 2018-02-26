@@ -19,7 +19,9 @@ apply plugin: 'com.android.application'
 /**
  * Extensions
  */
-def EXTENSIONS = ['libandroidapi']
+def EXTENSIONS = [
+        [ module: 'libandroidapi', extension: 'systems.altimit.libandroidapi.AndroidAPI' ],
+]
 
 android {
 
@@ -48,7 +50,7 @@ android {
         buildTypes.each { buildType ->
             buildType.buildConfigField "boolean",  "BACK_BUTTON_QUITS", String.valueOf(BACK_BUTTON_QUITS)
             buildType.buildConfigField "boolean",  "SHOW_FPS",          String.valueOf(SHOW_FPS)
-            buildType.buildConfigField "String[]", "EXTENSIONS",        "{" + EXTENSIONS.collect {"\"systems.altimit.${it}\""}.join(",")  + "}"
+            buildType.buildConfigField "String[]", "EXTENSION_CLASSES", "{" + EXTENSIONS.collect {"\"${it.extension}\""}.join(",")  + "}"
         }
     }
 
@@ -81,7 +83,12 @@ dependencies {
 
     zz_crosswalkImplementation 'org.xwalk:xwalk_core_library:23.53.589.4'
 
-    EXTENSIONS.each { extension ->
-        implementation project(':' + extension)
+    // Include any Client API Extensions
+    if (EXTENSIONS) {
+        implementation project(':clientapi')
+
+        EXTENSIONS.each { extension ->
+            implementation project(extension.module.startsWith(':') ? extension.module : ':' + extension.module)
+        }
     }
 }

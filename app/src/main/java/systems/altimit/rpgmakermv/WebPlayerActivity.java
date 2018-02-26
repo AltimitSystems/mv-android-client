@@ -34,6 +34,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import systems.altimit.clientapi.AbstractExtension;
+
 /**
  * Created by felixjones on 28/04/2017.
  */
@@ -42,7 +44,7 @@ public class WebPlayerActivity extends Activity {
     private static final String TOUCH_INPUT_ON_CANCEL = "TouchInput._onCancel();";
 
     private Player mPlayer;
-    private List<ExtensionManager.Extension> mExtensions;
+    private List<AbstractExtension> mExtensions;
     private AlertDialog mQuitDialog;
     private int mSystemUiVisibility;
 
@@ -73,7 +75,7 @@ public class WebPlayerActivity extends Activity {
         setContentView(mPlayer.getView());
 
         List<String> extensionSources = new ArrayList<>();
-        for (ExtensionManager.Extension extension : mExtensions) {
+        for (AbstractExtension extension : mExtensions) {
             for (Map.Entry<String, Object> entry : extension.getJavascriptInterfaces().entrySet()) {
                 mPlayer.addJavascriptInterface(entry.getValue(), entry.getKey());
             }
@@ -132,10 +134,8 @@ public class WebPlayerActivity extends Activity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        for (ExtensionManager.Extension extension : mExtensions) {
-            if (extension.respondsToRequestCode(requestCode)) {
-                extension.onActivityResult(requestCode, resultCode, data);
-            }
+        for (AbstractExtension extension : mExtensions) {
+            extension.onActivityResult(requestCode, resultCode, data);
         }
     }
 
