@@ -25,17 +25,12 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
 import java.util.HashMap;
 import java.util.Map;
 
 import systems.altimit.clientapi.AbstractExtension;
 import systems.altimit.libandroidapi.modules.AndroidFS;
 import systems.altimit.libandroidapi.modules.AndroidPath;
-
-import static java.lang.annotation.ElementType.METHOD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 /**
  * Created by felixjones on 24/02/2018.
