@@ -73,6 +73,16 @@ public class GooglePlay extends AbstractExtension {
         super(context);
         mParentActivity = ((Activity) context);
 
+        String val = mParentActivity.getString(R.string.app_id);
+
+        if (val.startsWith("YOUR_")) {
+            String message = "The APP_ID in ids.xml for this app has not been set, " +
+                    "Google Play Services can not be initialized";
+
+            new AlertDialog.Builder(mParentActivity).setMessage(message)
+                    .setNeutralButton(android.R.string.ok, null).create().show();
+        }
+
         cloudSaveEnabled = BuildConfig.ALLOW_CLOUD_SAVE;
         autoSignInEnabled = BuildConfig.ALLOW_AUTO_SIGNIN;
 
@@ -139,6 +149,8 @@ public class GooglePlay extends AbstractExtension {
 
                 handleErrorStatusCodes(statusCode);
             }
+        } else {
+            mSaveHandler.onActivityResult(requestCode, resultCode, data);
         }
     }
 
@@ -176,6 +188,11 @@ public class GooglePlay extends AbstractExtension {
                 });
 
         manualSignOut = true;
+    }
+
+    @JavascriptInterface
+    public boolean isSignedIn() {
+        return GoogleSignIn.getLastSignedInAccount(mParentActivity) != null;
     }
 
     private void handleErrorStatusCodes(int statusCode) {
@@ -258,9 +275,5 @@ public class GooglePlay extends AbstractExtension {
         mLeaderboardsHandler.setClient(null);
         mEventsHandler.setClient(null);
         mSaveHandler.setClient(null);
-    }
-
-    private boolean isSignedIn() {
-        return GoogleSignIn.getLastSignedInAccount(mParentActivity) != null;
     }
 }
