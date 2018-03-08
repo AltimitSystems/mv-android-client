@@ -73,10 +73,24 @@ public class GooglePlay extends AbstractExtension {
         super(context);
         mParentActivity = ((Activity) context);
 
-        mGoogleSignInClient = GoogleSignIn.getClient(mParentActivity,
-                new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
-                        .requestScopes(Drive.SCOPE_APPFOLDER)
-                        .build());
+        cloudSaveEnabled = BuildConfig.ALLOW_CLOUD_SAVE;
+        autoSignInEnabled = BuildConfig.ALLOW_AUTO_SIGNIN;
+
+        GoogleSignInOptions googleSignInOptions;
+
+        //noinspection ConstantConditions
+        if (cloudSaveEnabled) {
+           googleSignInOptions = new GoogleSignInOptions
+                   .Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
+                   .requestScopes(Drive.SCOPE_APPFOLDER)
+                   .build();
+       } else {
+           googleSignInOptions = new GoogleSignInOptions
+                   .Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
+                   .build();
+       }
+
+        mGoogleSignInClient = GoogleSignIn.getClient(mParentActivity, googleSignInOptions);
 
         mAchievementsHandler = new AchievementsHandler(mParentActivity);
         mLeaderboardsHandler = new LeaderboardsHandler(mParentActivity);
@@ -87,9 +101,6 @@ public class GooglePlay extends AbstractExtension {
         mInterfaces.put(INTERFACE_NAME, mAchievementsHandler);
         mInterfaces.put(INTERFACE_NAME, mLeaderboardsHandler);
         mInterfaces.put(INTERFACE_NAME, mEventsHandler);
-
-        cloudSaveEnabled = BuildConfig.ALLOW_CLOUD_SAVE;
-        autoSignInEnabled = BuildConfig.ALLOW_AUTO_SIGNIN;
 
         //noinspection ConstantConditions
         if (cloudSaveEnabled) {
