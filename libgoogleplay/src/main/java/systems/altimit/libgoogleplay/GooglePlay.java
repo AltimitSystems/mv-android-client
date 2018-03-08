@@ -62,6 +62,8 @@ public class GooglePlay extends AbstractExtension {
     private LeaderboardsHandler mLeaderboardsHandler;
     private EventsHandler mEventsHandler;
 
+    private boolean manualSignedOut = false;
+
     public GooglePlay(@NonNull Context context) {
         super(context);
         mParentActivity = ((Activity) context);
@@ -100,6 +102,8 @@ public class GooglePlay extends AbstractExtension {
             if (result.isSuccess()) {
                 GoogleSignInAccount signInAccount = result.getSignInAccount();
                 onConnected(signInAccount);
+
+                manualSignedOut = false;
             } else {
                 int statusCode = result.getStatus().getStatusCode();
 
@@ -112,7 +116,9 @@ public class GooglePlay extends AbstractExtension {
 
     @Override
     public void onResume() {
-        startSilentSignIn();
+        if (!manualSignedOut) {
+            startSilentSignIn();
+        }
     }
 
     @JavascriptInterface
@@ -133,6 +139,8 @@ public class GooglePlay extends AbstractExtension {
                         onDisconnected();
                     }
                 });
+
+        manualSignedOut = true;
     }
 
     private void handleErrorStatusCodes(int statusCode) {
