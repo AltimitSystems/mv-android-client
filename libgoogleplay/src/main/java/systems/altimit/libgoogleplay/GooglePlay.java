@@ -32,6 +32,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.CommonStatusCodes;
+import com.google.android.gms.drive.Drive;
 import com.google.android.gms.games.Games;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -43,6 +44,7 @@ import systems.altimit.clientapi.AbstractExtension;
 import systems.altimit.libgoogleplay.handlers.AchievementsHandler;
 import systems.altimit.libgoogleplay.handlers.EventsHandler;
 import systems.altimit.libgoogleplay.handlers.LeaderboardsHandler;
+import systems.altimit.libgoogleplay.handlers.SaveHandler;
 
 /**
  * Created by mgjus on 3/7/2018.
@@ -61,8 +63,11 @@ public class GooglePlay extends AbstractExtension {
     private AchievementsHandler mAchievementsHandler;
     private LeaderboardsHandler mLeaderboardsHandler;
     private EventsHandler mEventsHandler;
+    private SaveHandler mSaveHandler;
 
-    private boolean manualSignedOut = false;
+    private boolean manualSignOut = false;
+    private boolean cloudSaveEnabled;
+    private boolean autoSignInEnabled;
 
     public GooglePlay(@NonNull Context context) {
         super(context);
@@ -70,16 +75,26 @@ public class GooglePlay extends AbstractExtension {
 
         mGoogleSignInClient = GoogleSignIn.getClient(mParentActivity,
                 new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
+                        .requestScopes(Drive.SCOPE_APPFOLDER)
                         .build());
 
         mAchievementsHandler = new AchievementsHandler(mParentActivity);
         mLeaderboardsHandler = new LeaderboardsHandler(mParentActivity);
         mEventsHandler = new EventsHandler(mParentActivity);
+        mSaveHandler = new SaveHandler(mParentActivity);
 
         mInterfaces.put(INTERFACE_NAME, this);
         mInterfaces.put(INTERFACE_NAME, mAchievementsHandler);
         mInterfaces.put(INTERFACE_NAME, mLeaderboardsHandler);
         mInterfaces.put(INTERFACE_NAME, mEventsHandler);
+
+        cloudSaveEnabled = BuildConfig.ALLOW_CLOUD_SAVE;
+        autoSignInEnabled = BuildConfig.ALLOW_AUTO_SIGNIN;
+
+        //noinspection ConstantConditions
+        if (cloudSaveEnabled) {
+            mInterfaces.put(INTERFACE_NAME, mSaveHandler);
+        }
     }
 
     @Override
@@ -103,7 +118,9 @@ public class GooglePlay extends AbstractExtension {
                 GoogleSignInAccount signInAccount = result.getSignInAccount();
                 onConnected(signInAccount);
 
-                manualSignedOut = false;
+                manualSignOut = false;
+
+                mAchievementsHandler.cacheAchievements();
             } else {
                 int statusCode = result.getStatus().getStatusCode();
 
@@ -116,8 +133,15 @@ public class GooglePlay extends AbstractExtension {
 
     @Override
     public void onResume() {
-        if (!manualSignedOut) {
+        if (!manualSignOut && autoSignInEnabled) {
             startSilentSignIn();
+        }
+    }
+
+    @Override
+    public void onStart() {
+        if (!manualSignOut && autoSignInEnabled) {
+            startInteractiveSignIn();
         }
     }
 
@@ -140,7 +164,7 @@ public class GooglePlay extends AbstractExtension {
                     }
                 });
 
-        manualSignedOut = true;
+        manualSignOut = true;
     }
 
     private void handleErrorStatusCodes(int statusCode) {
@@ -210,12 +234,19 @@ public class GooglePlay extends AbstractExtension {
         mLeaderboardsHandler.setClient(Games.getLeaderboardsClient(mParentActivity,
                 googleSignInAccount));
         mEventsHandler.setClient(Games.getEventsClient(mParentActivity, googleSignInAccount));
+
+        if (cloudSaveEnabled) {
+            mSaveHandler.setClient(Games.getSnapshotsClient(mParentActivity, googleSignInAccount));
+        } else {
+            mSaveHandler.setClient(null);
+        }
     }
 
     private void onDisconnected() {
         mAchievementsHandler.setClient(null);
         mLeaderboardsHandler.setClient(null);
         mEventsHandler.setClient(null);
+        mSaveHandler.setClient(null);
     }
 
     private boolean isSignedIn() {

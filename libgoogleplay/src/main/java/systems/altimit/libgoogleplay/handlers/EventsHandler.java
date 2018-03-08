@@ -17,9 +17,18 @@
 package systems.altimit.libgoogleplay.handlers;
 
 import android.app.Activity;
+import android.support.annotation.NonNull;
 import android.webkit.JavascriptInterface;
 
+import com.google.android.gms.games.AnnotatedData;
 import com.google.android.gms.games.EventsClient;
+import com.google.android.gms.games.event.Event;
+import com.google.android.gms.games.event.EventBuffer;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by mgjus on 3/7/2018.

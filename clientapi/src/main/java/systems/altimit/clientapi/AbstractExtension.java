@@ -37,6 +37,26 @@ public abstract class AbstractExtension {
         // Do noting by default
     }
 
+    public void onPause() {
+        // Do noting by default
+    }
+
+    public void onStart() {
+        // Do noting by default
+    }
+
+    public void onStop() {
+        // Do noting by default
+    }
+
+    public void onDestroy() {
+        // Do nothing by default
+    }
+
+    public void onRestart() {
+        // Do nothing by default
+    }
+
     public abstract Map<String, Object> getJavascriptInterfaces();
 
     public abstract String[] getJavascriptSources();
