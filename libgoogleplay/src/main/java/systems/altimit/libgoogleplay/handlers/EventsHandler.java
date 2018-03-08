@@ -17,6 +17,7 @@
 package systems.altimit.libgoogleplay.handlers;
 
 import android.app.Activity;
+import android.webkit.JavascriptInterface;
 
 import com.google.android.gms.games.EventsClient;
 
@@ -26,5 +27,12 @@ import com.google.android.gms.games.EventsClient;
 public class EventsHandler extends AbstractHandler<EventsClient> {
     public EventsHandler(Activity activity) {
         super(activity);
+    }
+
+    @JavascriptInterface
+    public void incrementEvent(String eventId, int amountToIncrement) {
+        if (mClient != null) {
+            mClient.increment(eventId, amountToIncrement);
+        }
     }
 }
