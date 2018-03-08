@@ -29,7 +29,9 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -38,11 +40,17 @@ import java.util.Map;
 public class AchievementsHandler extends AbstractHandler<AchievementsClient> {
     private static final int RC_ACHIEVEMENT_UI = 9003;
 
-    private Map<String, Boolean> achievementCache;
+    private Map<String, Boolean> mAchievementCache;
+    private Map<String, IncrementalAchievementShell> mIncrementalCache;
+
+    private List<String> mAchievementsToUnlock;
 
     public AchievementsHandler(Activity activity) {
         super(activity);
-        achievementCache = new HashMap<>();
+        mAchievementCache = new HashMap<>();
+        mIncrementalCache = new HashMap<>();
+
+        mAchievementsToUnlock = new ArrayList<>();
     }
 
     @JavascriptInterface
@@ -60,15 +68,32 @@ public class AchievementsHandler extends AbstractHandler<AchievementsClient> {
 
     @JavascriptInterface
     public void unlockAchievement(String achievementId) {
-        if ((mClient != null) && !achievementCache.get(achievementId)) {
+        if (mClient != null) {
             mClient.unlock(achievementId);
+            mAchievementCache.put(achievementId, true);
+        } else {
+            if (!mAchievementCache.get(achievementId)) {
+                mAchievementCache.put(achievementId, true);
+                mAchievementsToUnlock.add(achievementId);
+            }
         }
     }
 
     @JavascriptInterface
     public void incrementAchievementStep(String achievementId, int amountToIncrement) {
-        if ((mClient != null) && !achievementCache.get(achievementId)) {
+        if (mClient != null) {
             mClient.increment(achievementId, amountToIncrement);
+        } else {
+            if (!mAchievementCache.get(achievementId)) {
+                IncrementalAchievementShell shell = mIncrementalCache.get(achievementId);
+
+                shell.currentSteps += amountToIncrement;
+
+                if (shell.currentSteps >= shell.stepsToUnlock) {
+                    mAchievementCache.put(achievementId, true);
+                    mAchievementsToUnlock.add(achievementId);
+                }
+            }
         }
     }
 
@@ -79,18 +104,50 @@ public class AchievementsHandler extends AbstractHandler<AchievementsClient> {
             public void onComplete(@NonNull Task<AnnotatedData<AchievementBuffer>> task) {
                 AchievementBuffer achievementBuffer = task.getResult().get();
 
+                List<Achievement> mAchievementList = new ArrayList<>();
+
                 int bufferSize = achievementBuffer.getCount();
 
                 for (int i = 0; i < bufferSize; i++) {
                     Achievement achievement = achievementBuffer.get(i);
-                    String id = achievement.getAchievementId();
-                    boolean unlocked = (achievement.getState() == Achievement.STATE_UNLOCKED);
 
-                    achievementCache.put(id, unlocked);
+                    mAchievementList.add(achievement);
                 }
 
                 achievementBuffer.release();
+                sortAchievements(mAchievementList);
             }
         });
+    }
+
+    public void unlockCachedAchievements() {
+        for (String id : mAchievementsToUnlock) {
+            unlockAchievement(id);
+        }
+    }
+
+    private void sortAchievements(List<Achievement> achievementList) {
+        for (Achievement achievement : achievementList) {
+            String id = achievement.getAchievementId();
+            boolean unlocked = (achievement.getState() == Achievement.STATE_UNLOCKED);
+
+            mAchievementCache.put(id, unlocked);
+
+            if (achievement.getType() == Achievement.TYPE_INCREMENTAL) {
+                int steps = achievement.getCurrentSteps();
+                int total = achievement.getTotalSteps();
+
+                IncrementalAchievementShell shell = new IncrementalAchievementShell();
+                shell.currentSteps = steps;
+                shell.stepsToUnlock = total;
+
+                mIncrementalCache.put(id, shell);
+            }
+        }
+    }
+
+    private class IncrementalAchievementShell {
+        int currentSteps = 0;
+        int stepsToUnlock = 0;
     }
 }

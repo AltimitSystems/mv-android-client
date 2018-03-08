@@ -268,6 +268,8 @@ public class GooglePlay extends AbstractExtension {
         } else {
             mSaveHandler.setClient(null);
         }
+
+        mAchievementsHandler.unlockCachedAchievements();
     }
 
     private void onDisconnected() {
