@@ -132,6 +132,10 @@ public class WebPlayerActivity extends Activity {
             mPlayer.resumeTimers();
             mPlayer.onShow();
         }
+
+        for (AbstractExtension extension : mExtensions) {
+            extension.onResume();
+        }
     }
 
     @Override

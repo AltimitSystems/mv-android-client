@@ -14,31 +14,17 @@
  * limitations under the License.
  */
 
-package systems.altimit.clientapi;
+package systems.altimit.libgoogleplay.handlers;
 
-import android.content.Context;
-import android.content.Intent;
-import android.support.annotation.NonNull;
+import android.app.Activity;
 
-import java.util.Map;
+import com.google.android.gms.games.PlayersClient;
 
 /**
- * Created by felixjones on 26/02/2018.
+ * Created by mgjus on 3/7/2018.
  */
-public abstract class AbstractExtension {
-
-    public AbstractExtension(@NonNull Context context) {}
-
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // Do nothing by default
+public class PlayersHandler extends AbstractHandler<PlayersClient> {
+    public PlayersHandler(Activity activity) {
+        super(activity);
     }
-
-    public void onResume() {
-        // Do noting by default
-    }
-
-    public abstract Map<String, Object> getJavascriptInterfaces();
-
-    public abstract String[] getJavascriptSources();
-
 }

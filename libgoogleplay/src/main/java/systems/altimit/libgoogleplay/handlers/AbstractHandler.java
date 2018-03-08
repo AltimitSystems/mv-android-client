@@ -14,31 +14,29 @@
  * limitations under the License.
  */
 
-package systems.altimit.clientapi;
+package systems.altimit.libgoogleplay.handlers;
 
-import android.content.Context;
-import android.content.Intent;
-import android.support.annotation.NonNull;
+import android.app.Activity;
 
-import java.util.Map;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
 
 /**
- * Created by felixjones on 26/02/2018.
+ * Created by mgjus on 3/7/2018.
  */
-public abstract class AbstractExtension {
+abstract class AbstractHandler<T> {
+    Activity mParentActivity;
 
-    public AbstractExtension(@NonNull Context context) {}
+    T mClient = null;
 
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // Do nothing by default
+    AbstractHandler(Activity activity) {
+        mParentActivity =  activity;
     }
 
-    public void onResume() {
-        // Do noting by default
+    public void setClient(T achievementsClient) {
+        mClient = achievementsClient;
     }
 
-    public abstract Map<String, Object> getJavascriptInterfaces();
-
-    public abstract String[] getJavascriptSources();
-
+    boolean isSignedIn() {
+        return GoogleSignIn.getLastSignedInAccount(mParentActivity) != null;
+    }
 }

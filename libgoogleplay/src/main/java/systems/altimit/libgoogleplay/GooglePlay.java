@@ -29,19 +29,20 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.games.AchievementsClient;
-import com.google.android.gms.games.EventsClient;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.games.Games;
-import com.google.android.gms.games.LeaderboardsClient;
-import com.google.android.gms.games.PlayersClient;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import systems.altimit.clientapi.AbstractExtension;
+import systems.altimit.libgoogleplay.handlers.AchievementsHandler;
+import systems.altimit.libgoogleplay.handlers.EventsHandler;
+import systems.altimit.libgoogleplay.handlers.LeaderboardsHandler;
+import systems.altimit.libgoogleplay.handlers.PlayersHandler;
 
 /**
  * Created by mgjus on 3/7/2018.
@@ -49,29 +50,43 @@ import systems.altimit.clientapi.AbstractExtension;
 public class GooglePlay extends AbstractExtension {
     private static final String INTERFACE_NAME = "__google_play";
 
-    private static final int RC_UNUSED = 5001;
     private static final int RC_SIGN_IN = 9001;
-    private static final int RC_ACHIEVEMENT_UI = 9003;
 
-    private Activity mActivity = null;
+    private Activity mParentActivity;
 
     private Map<String, Object> mInterfaces = new HashMap<>();
 
     private GoogleSignInClient mGoogleSignInClient;
 
-    private AchievementsClient mAchievementsClient;
-    private LeaderboardsClient mLeaderboardsClient;
-    private EventsClient mEventsClient;
-    private PlayersClient mPlayersClient;
+    private AchievementsHandler mAchievementsHandler;
+    private LeaderboardsHandler mLeaderboardsHandler;
+    private EventsHandler mEventsHandler;
+    private PlayersHandler mPlayersHandler;
 
     public GooglePlay(@NonNull Context context) {
         super(context);
-        mActivity = ((Activity) context);
+        mParentActivity = ((Activity) context);
 
-        mGoogleSignInClient = GoogleSignIn.getClient(mActivity,
-                new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN).build());
+        mGoogleSignInClient = GoogleSignIn.getClient(mParentActivity,
+                new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
+                        .build());
+
+        mAchievementsHandler = new AchievementsHandler(mParentActivity);
+        mLeaderboardsHandler = new LeaderboardsHandler(mParentActivity);
+        mEventsHandler = new EventsHandler(mParentActivity);
+        mPlayersHandler = new PlayersHandler(mParentActivity);
 
         mInterfaces.put(INTERFACE_NAME, this);
+        mInterfaces.put(INTERFACE_NAME, mAchievementsHandler);
+        mInterfaces.put(INTERFACE_NAME, mLeaderboardsHandler);
+
+        /*
+        * keeping this here until implementation is finished
+        *
+        * mInterfaces.put(INTERFACE_NAME, mEventsHandler);
+        * mInterfaces.put(INTERFACE_NAME, mParentActivity);
+        *
+        */
     }
 
     @Override
@@ -95,24 +110,23 @@ public class GooglePlay extends AbstractExtension {
                 GoogleSignInAccount signInAccount = result.getSignInAccount();
                 onConnected(signInAccount);
             } else {
-                String message = result.getStatus().getStatusMessage();
-
-                // TODO: replace with descriptive errors for possible status codes
-                if (message == null || message.isEmpty()) {
-                    message = "Other sign in error";
-                }
+                int statusCode = result.getStatus().getStatusCode();
 
                 onDisconnected();
 
-                new AlertDialog.Builder(mActivity).setMessage(message)
-                        .setNeutralButton(android.R.string.ok, null).show();
+                handleErrorStatusCodes(statusCode);
             }
         }
     }
 
+    @Override
+    public void onResume() {
+        startSilentSignIn();
+    }
+
     @JavascriptInterface
     public void startSilentSignIn() {
-        mGoogleSignInClient.silentSignIn().addOnCompleteListener(mActivity,
+        mGoogleSignInClient.silentSignIn().addOnCompleteListener(mParentActivity,
                 new OnCompleteListener<GoogleSignInAccount>() {
                     @Override
                     public void onComplete(@NonNull Task<GoogleSignInAccount> task) {
@@ -120,7 +134,12 @@ public class GooglePlay extends AbstractExtension {
                             GoogleSignInAccount signInAccount = task.getResult();
                             onConnected(signInAccount);
                         } else {
-                            startInteractiveSignIn();
+                            ApiException exception = ((ApiException) task.getException());
+
+                            if ((exception != null ? exception.getStatusCode() : 0)
+                                    == CommonStatusCodes.SIGN_IN_REQUIRED) {
+                                startInteractiveSignIn();
+                            }
                         }
                     }
                 });
@@ -128,7 +147,7 @@ public class GooglePlay extends AbstractExtension {
 
     @JavascriptInterface
     public void startInteractiveSignIn() {
-        mActivity.startActivityForResult(mGoogleSignInClient.getSignInIntent(), RC_SIGN_IN);
+        mParentActivity.startActivityForResult(mGoogleSignInClient.getSignInIntent(), RC_SIGN_IN);
     }
 
     @JavascriptInterface
@@ -137,7 +156,7 @@ public class GooglePlay extends AbstractExtension {
             return;
         }
 
-        mGoogleSignInClient.signOut().addOnCompleteListener(mActivity,
+        mGoogleSignInClient.signOut().addOnCompleteListener(mParentActivity,
                 new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
@@ -146,48 +165,36 @@ public class GooglePlay extends AbstractExtension {
                 });
     }
 
-    @JavascriptInterface
-    public void showAchievementView() {
-        if (mAchievementsClient != null) {
-            mAchievementsClient.getAchievementsIntent()
-                    .addOnSuccessListener(new OnSuccessListener<Intent>() {
-                        @Override
-                        public void onSuccess(Intent intent) {
-                            mActivity.startActivityForResult(intent, RC_ACHIEVEMENT_UI);
-                        }
-                    });
-        }
-    }
+    private void handleErrorStatusCodes(int statusCode) {
+        String message;
 
-    @JavascriptInterface
-    public void unlockAchievement(String achievementId) {
-        if (mAchievementsClient != null) {
-            mAchievementsClient.unlock(achievementId);
+        // TODO: implement status code handling
+        switch (statusCode) {
+            default:
+                message = "An unknown error has occurred...";
         }
-    }
 
-    @JavascriptInterface
-    public void incrementAchievementStep(String achievementId, int amountToIncrement) {
-        if (mAchievementsClient != null) {
-            mAchievementsClient.increment(achievementId, amountToIncrement);
-        }
+        new AlertDialog.Builder(mParentActivity).setMessage(message)
+                .setNeutralButton(android.R.string.ok, null).show();
     }
 
     private void onConnected(GoogleSignInAccount googleSignInAccount) {
-        mAchievementsClient = Games.getAchievementsClient(mActivity, googleSignInAccount);
-        mLeaderboardsClient = Games.getLeaderboardsClient(mActivity, googleSignInAccount);
-        mEventsClient = Games.getEventsClient(mActivity, googleSignInAccount);
-        mPlayersClient = Games.getPlayersClient(mActivity, googleSignInAccount);
+        mAchievementsHandler.setClient(Games.getAchievementsClient(mParentActivity,
+                googleSignInAccount));
+        mLeaderboardsHandler.setClient(Games.getLeaderboardsClient(mParentActivity,
+                googleSignInAccount));
+        mEventsHandler.setClient(Games.getEventsClient(mParentActivity, googleSignInAccount));
+        mPlayersHandler.setClient(Games.getPlayersClient(mParentActivity, googleSignInAccount));
     }
 
     private void onDisconnected() {
-        mAchievementsClient = null;
-        mLeaderboardsClient = null;
-        mEventsClient = null;
-        mPlayersClient = null;
+        mAchievementsHandler.setClient(null);
+        mLeaderboardsHandler.setClient(null);
+        mEventsHandler.setClient(null);
+        mPlayersHandler.setClient(null);
     }
 
     private boolean isSignedIn() {
-        return GoogleSignIn.getLastSignedInAccount(mActivity) != null;
+        return GoogleSignIn.getLastSignedInAccount(mParentActivity) != null;
     }
 }

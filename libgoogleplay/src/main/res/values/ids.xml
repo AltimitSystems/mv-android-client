@@ -19,6 +19,7 @@
          the Events, Achievements, or Leaderboards menu of the Google Play Console.
 
          NOTE: In reality, all you need here is your App ID from the Play Console as you'll be
-         making achievement unlock calls via Script events or something from your MV game -->
+         making achievement unlock calls via Script events or something from your MV game
+         using the achievement ids, etc, anyways -->
     <string name="app_id">YOUR_APP_ID</string>
 </resources>
