@@ -71,7 +71,7 @@ public class AchievementsHandler extends AbstractHandler<AchievementsClient> {
         if (mClient != null) {
             mClient.unlock(achievementId);
             mAchievementCache.put(achievementId, true);
-        } else {
+        } else if (!mAchievementCache.isEmpty()) {
             if (!mAchievementCache.get(achievementId)) {
                 mAchievementCache.put(achievementId, true);
                 mAchievementsToUnlock.add(achievementId);
@@ -83,7 +83,7 @@ public class AchievementsHandler extends AbstractHandler<AchievementsClient> {
     public void incrementAchievementStep(String achievementId, int amountToIncrement) {
         if (mClient != null) {
             mClient.increment(achievementId, amountToIncrement);
-        } else {
+        } else if (!mAchievementCache.isEmpty()) {
             if (!mAchievementCache.get(achievementId)) {
                 IncrementalAchievementShell shell = mIncrementalCache.get(achievementId);
 
@@ -121,8 +121,12 @@ public class AchievementsHandler extends AbstractHandler<AchievementsClient> {
     }
 
     public void unlockCachedAchievements() {
-        for (String id : mAchievementsToUnlock) {
-            unlockAchievement(id);
+        if (mClient != null) {
+            for (String id : mAchievementsToUnlock) {
+                mClient.unlock(id);
+            }
+
+            mAchievementsToUnlock.clear();
         }
     }
 
