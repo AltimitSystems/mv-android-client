@@ -121,7 +121,7 @@ public class AchievementsHandler extends AbstractHandler<AchievementsClient> {
     }
 
     public void unlockCachedAchievements() {
-        if (mClient != null) {
+        if ((mClient != null) && !mAchievementsToUnlock.isEmpty()) {
             for (String id : mAchievementsToUnlock) {
                 mClient.unlock(id);
             }

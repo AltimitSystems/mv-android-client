@@ -140,8 +140,6 @@ public class GooglePlay extends AbstractExtension {
                 onConnected(signInAccount);
 
                 manualSignOut = false;
-
-                mAchievementsHandler.cacheAchievements();
             } else {
                 int statusCode = result.getStatus().getStatusCode();
 
@@ -270,6 +268,7 @@ public class GooglePlay extends AbstractExtension {
         }
 
         mAchievementsHandler.unlockCachedAchievements();
+        mAchievementsHandler.cacheAchievements();
     }
 
     private void onDisconnected() {
