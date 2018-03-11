@@ -17,7 +17,7 @@
 apply plugin: 'com.android.library'
 
 android {
-    def ALLOW_CLOUD_SAVE = false // allow cloud save functionality, if desired
+    //def ALLOW_CLOUD_SAVE = false // allow cloud save functionality, if desired
     def ALLOW_AUTO_SIGNIN = true // toggle as per 1.1 from https://developers.google.com/games/services/checklist#1_sign-in
                                  // as you CANNOT have auto sign-in if children under 13 are an
                                  // intended audience
@@ -31,7 +31,7 @@ android {
 
     buildTypes {
         buildTypes.each { buildType ->
-            buildType.buildConfigField "boolean",  "ALLOW_CLOUD_SAVE", String.valueOf(ALLOW_CLOUD_SAVE)
+            //buildType.buildConfigField "boolean",  "ALLOW_CLOUD_SAVE", String.valueOf(ALLOW_CLOUD_SAVE)
             buildType.buildConfigField "boolean",  "ALLOW_AUTO_SIGNIN", String.valueOf(ALLOW_AUTO_SIGNIN)
         }
     }
@@ -44,5 +44,5 @@ dependencies {
     implementation 'com.google.android.gms:play-services-games:11.8.0'
     implementation 'com.google.android.gms:play-services-auth:11.8.0'
 
-    implementation 'com.google.code.gson:gson:2.8.2'
+    //implementation 'com.google.code.gson:gson:2.8.2'
 }

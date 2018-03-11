@@ -32,7 +32,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.CommonStatusCodes;
-import com.google.android.gms.drive.Drive;
 import com.google.android.gms.games.Games;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -44,7 +43,6 @@ import systems.altimit.clientapi.AbstractExtension;
 import systems.altimit.libgoogleplay.handlers.AchievementsHandler;
 import systems.altimit.libgoogleplay.handlers.EventsHandler;
 import systems.altimit.libgoogleplay.handlers.LeaderboardsHandler;
-import systems.altimit.libgoogleplay.handlers.SaveHandler;
 
 /**
  * Created by mgjus on 3/7/2018.
@@ -63,11 +61,9 @@ public class GooglePlay extends AbstractExtension {
     private AchievementsHandler mAchievementsHandler;
     private LeaderboardsHandler mLeaderboardsHandler;
     private EventsHandler mEventsHandler;
-    private SaveHandler mSaveHandler;
 
-    private boolean manualSignOut = false;
-    private boolean cloudSaveEnabled;
     private boolean autoSignInEnabled;
+    private boolean manualSignOut = false;
 
     public GooglePlay(@NonNull Context context) {
         super(context);
@@ -77,45 +73,28 @@ public class GooglePlay extends AbstractExtension {
 
         if (val.startsWith("YOUR_")) {
             String message = "The APP_ID in ids.xml for this app has not been set, " +
-                    "Google Play Services can not be initialized";
+                    "Google Play Services will not be initialized";
 
             new AlertDialog.Builder(mParentActivity).setMessage(message)
                     .setNeutralButton(android.R.string.ok, null).create().show();
         }
 
-        cloudSaveEnabled = BuildConfig.ALLOW_CLOUD_SAVE;
         autoSignInEnabled = BuildConfig.ALLOW_AUTO_SIGNIN;
 
-        GoogleSignInOptions googleSignInOptions;
-
-        //noinspection ConstantConditions
-        if (cloudSaveEnabled) {
-           googleSignInOptions = new GoogleSignInOptions
-                   .Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
-                   .requestScopes(Drive.SCOPE_APPFOLDER)
-                   .build();
-       } else {
-           googleSignInOptions = new GoogleSignInOptions
-                   .Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
-                   .build();
-       }
+        GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions
+                .Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
+                .build();
 
         mGoogleSignInClient = GoogleSignIn.getClient(mParentActivity, googleSignInOptions);
 
         mAchievementsHandler = new AchievementsHandler(mParentActivity);
         mLeaderboardsHandler = new LeaderboardsHandler(mParentActivity);
         mEventsHandler = new EventsHandler(mParentActivity);
-        mSaveHandler = new SaveHandler(mParentActivity);
 
         mInterfaces.put(INTERFACE_NAME, this);
         mInterfaces.put(INTERFACE_NAME, mAchievementsHandler);
         mInterfaces.put(INTERFACE_NAME, mLeaderboardsHandler);
         mInterfaces.put(INTERFACE_NAME, mEventsHandler);
-
-        //noinspection ConstantConditions
-        if (cloudSaveEnabled) {
-            mInterfaces.put(INTERFACE_NAME, mSaveHandler);
-        }
     }
 
     @Override
@@ -147,8 +126,6 @@ public class GooglePlay extends AbstractExtension {
 
                 handleErrorStatusCodes(statusCode);
             }
-        } else {
-            mSaveHandler.onActivityResult(requestCode, resultCode, data);
         }
     }
 
@@ -261,12 +238,6 @@ public class GooglePlay extends AbstractExtension {
                 googleSignInAccount));
         mEventsHandler.setClient(Games.getEventsClient(mParentActivity, googleSignInAccount));
 
-        if (cloudSaveEnabled) {
-            mSaveHandler.setClient(Games.getSnapshotsClient(mParentActivity, googleSignInAccount));
-        } else {
-            mSaveHandler.setClient(null);
-        }
-
         mAchievementsHandler.unlockCachedAchievements();
         mAchievementsHandler.cacheAchievements();
     }
@@ -275,6 +246,5 @@ public class GooglePlay extends AbstractExtension {
         mAchievementsHandler.setClient(null);
         mLeaderboardsHandler.setClient(null);
         mEventsHandler.setClient(null);
-        mSaveHandler.setClient(null);
     }
 }
