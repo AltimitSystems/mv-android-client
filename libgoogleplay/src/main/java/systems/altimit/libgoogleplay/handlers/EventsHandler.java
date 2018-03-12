@@ -40,7 +40,7 @@ public class EventsHandler extends AbstractHandler<EventsClient> {
     public static final String INTERFACE_NAME = "__google_play_events";
 
     private Map<String, EventShell> mEventsCache;
-    private Map<String, Integer> mOfflineEventCache;
+    private Map<String, Long> mOfflineEventCache;
 
     private Gson gson;
 
@@ -54,29 +54,36 @@ public class EventsHandler extends AbstractHandler<EventsClient> {
     }
 
     @JavascriptInterface
-    public void incrementEvent(String eventId, int amountToIncrement) {
+    public String incrementEvent(String eventId, long amountToIncrement) {
         if (mClient != null) {
-            mClient.increment(eventId, amountToIncrement);
-        } else {
-            if (mOfflineEventCache.get(eventId) != null) {
-                mOfflineEventCache.put(eventId,
-                        (mOfflineEventCache.get(eventId) + amountToIncrement));
-            } else {
-                mOfflineEventCache.put(eventId, amountToIncrement);
+            mClient.increment(eventId, ((int) amountToIncrement));
+        }
+
+        if (!mEventsCache.isEmpty()) {
+            EventShell shell = mEventsCache.get(eventId);
+
+            if (shell != null) {
+                shell.val += amountToIncrement;
+
+                mEventsCache.put(eventId, shell);
+
+                if (mOfflineEventCache.get(eventId) != null) {
+                    mOfflineEventCache.put(eventId,
+                            (mOfflineEventCache.get(eventId) + amountToIncrement));
+                } else {
+                    mOfflineEventCache.put(eventId, amountToIncrement);
+                }
+
+                return gson.toJson(shell);
             }
         }
+
+        return null;
     }
 
     @JavascriptInterface
     public String getAllEventDataAsJSON() {
         return (!mEventsCache.isEmpty()) ? gson.toJson(mEventsCache.values().toArray()) : null;
-    }
-
-    @JavascriptInterface
-    public String getEventDataAsJSON(String eventId) {
-        EventShell event = mEventsCache.get(eventId);
-
-        return (event != null) ? gson.toJson(event) : null;
     }
 
     public void cacheEvents(boolean forceReload) {
@@ -104,8 +111,8 @@ public class EventsHandler extends AbstractHandler<EventsClient> {
 
     public void incrementCachedEvents() {
         if (!mOfflineEventCache.isEmpty() && (mClient != null)) {
-            for (Map.Entry<String, Integer> entry : mOfflineEventCache.entrySet()) {
-                mClient.increment(entry.getKey(), entry.getValue());
+            for (Map.Entry<String, Long> entry : mOfflineEventCache.entrySet()) {
+                mClient.increment(entry.getKey(), entry.getValue().intValue());
             }
 
             mOfflineEventCache.clear();
