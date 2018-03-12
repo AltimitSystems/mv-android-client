@@ -26,5 +26,5 @@
     <string name="api_invalid_account">Client attempted to connect with an invalid account
         name specified</string>
     <string name="api_timeout">Timed out while waiting for result&#8230;</string>
-    <string name="api_unspecified">An unspecified error has occurred&#8230;</string>
+    <string name="api_unspecified">An unspecified error has occurred&#8230; Error Code:</string>
 </resources>

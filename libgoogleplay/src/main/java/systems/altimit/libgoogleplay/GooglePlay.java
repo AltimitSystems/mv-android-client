@@ -197,7 +197,7 @@ public class GooglePlay extends AbstractExtension {
                 message = mParentActivity.getString(R.string.api_timeout);
                 break;
                 default:
-                    message = mParentActivity.getString(R.string.api_unspecified);
+                    message = mParentActivity.getString(R.string.api_unspecified) + statusCode;
                     break;
         }
 
