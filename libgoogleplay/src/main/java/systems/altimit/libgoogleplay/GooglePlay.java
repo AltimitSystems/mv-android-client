@@ -64,6 +64,7 @@ public class GooglePlay extends AbstractExtension {
 
     private boolean autoSignInEnabled;
     private boolean manualSignOut = false;
+    private boolean firstStart = true;
 
     public GooglePlay(@NonNull Context context) {
         super(context);
@@ -239,7 +240,17 @@ public class GooglePlay extends AbstractExtension {
         mEventsHandler.setClient(Games.getEventsClient(mParentActivity, googleSignInAccount));
 
         mAchievementsHandler.unlockCachedAchievements();
-        mAchievementsHandler.cacheAchievements();
+        mEventsHandler.incrementCachedEvents();
+
+        if (firstStart) {
+            mAchievementsHandler.cacheAchievements(true);
+            mEventsHandler.cacheEvents(true);
+
+            firstStart = false;
+        } else {
+            mAchievementsHandler.cacheAchievements(false);
+            mEventsHandler.cacheEvents(false);
+        }
     }
 
     private void onDisconnected() {

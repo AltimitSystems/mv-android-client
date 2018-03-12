@@ -17,9 +17,21 @@
 package systems.altimit.libgoogleplay.handlers;
 
 import android.app.Activity;
+import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.webkit.JavascriptInterface;
 
+import com.google.android.gms.games.AnnotatedData;
 import com.google.android.gms.games.EventsClient;
+import com.google.android.gms.games.event.Event;
+import com.google.android.gms.games.event.EventBuffer;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by mgjus on 3/7/2018.
@@ -27,14 +39,94 @@ import com.google.android.gms.games.EventsClient;
 public class EventsHandler extends AbstractHandler<EventsClient> {
     public static final String INTERFACE_NAME = "__google_play_events";
 
+    private Map<String, EventShell> mEventsCache;
+    private Map<String, Integer> mOfflineEventCache;
+
+    private Gson gson;
+
     public EventsHandler(Activity activity) {
         super(activity);
+
+        mEventsCache = new HashMap<>();
+        mOfflineEventCache = new HashMap<>();
+
+        gson = new GsonBuilder().serializeNulls().create();
     }
 
     @JavascriptInterface
     public void incrementEvent(String eventId, int amountToIncrement) {
         if (mClient != null) {
             mClient.increment(eventId, amountToIncrement);
+        } else {
+            if (mOfflineEventCache.get(eventId) != null) {
+                mOfflineEventCache.put(eventId,
+                        (mOfflineEventCache.get(eventId) + amountToIncrement));
+            } else {
+                mOfflineEventCache.put(eventId, amountToIncrement);
+            }
+        }
+    }
+
+    @JavascriptInterface
+    public String getAllEventDataAsJSON() {
+        return (!mEventsCache.isEmpty()) ? gson.toJson(mEventsCache.values().toArray()) : null;
+    }
+
+    @JavascriptInterface
+    public String getEventDataAsJSON(String eventId) {
+        EventShell event = mEventsCache.get(eventId);
+
+        return (event != null) ? gson.toJson(event) : null;
+    }
+
+    public void cacheEvents(boolean forceReload) {
+        mClient.load(forceReload)
+                .addOnCompleteListener(new OnCompleteListener<AnnotatedData<EventBuffer>>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AnnotatedData<EventBuffer>> task) {
+                        if (task.isSuccessful()) {
+                            EventBuffer eventBuffer = task.getResult().get();
+
+                            int buffSize = eventBuffer.getCount();
+
+                            for (int i = 0; i < buffSize; i++) {
+                                Event event = eventBuffer.get(i).freeze();
+                                EventShell shell = new EventShell(event);
+
+                                mEventsCache.put(event.getEventId(), shell);
+                            }
+
+                            eventBuffer.release();
+                        }
+                    }
+                });
+    }
+
+    public void incrementCachedEvents() {
+        if (!mOfflineEventCache.isEmpty() && (mClient != null)) {
+            for (Map.Entry<String, Integer> entry : mOfflineEventCache.entrySet()) {
+                mClient.increment(entry.getKey(), entry.getValue());
+            }
+
+            mOfflineEventCache.clear();
+        }
+    }
+
+    private class EventShell {
+        String id;
+        String name;
+        String desc;
+        String formatedVal;
+        Uri imageUri;
+        long val;
+
+        EventShell(Event event) {
+            id = event.getEventId();
+            name = event.getName();
+            desc = event.getDescription();
+            formatedVal = event.getFormattedValue();
+            imageUri = event.getIconImageUri();
+            val = event.getValue();
         }
     }
 }

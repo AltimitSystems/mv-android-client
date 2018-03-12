@@ -18,6 +18,7 @@ package systems.altimit.libgoogleplay.handlers;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.webkit.JavascriptInterface;
 
@@ -28,6 +29,8 @@ import com.google.android.gms.games.achievement.AchievementBuffer;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,18 +45,17 @@ public class AchievementsHandler extends AbstractHandler<AchievementsClient> {
 
     private static final int RC_ACHIEVEMENT_UI = 9003;
 
-    private List<Achievement> mAchievementList = new ArrayList<>();
-    private Map<String, Boolean> mAchievementCache;
-    private Map<String, IncrementalAchievementShell> mIncrementalCache;
+    private Map<String, AchievementShell> mAchievementCache;
+    private List<String> mUnlockQueue;
 
-    private List<String> mAchievementsToUnlock;
+    private Gson gson;
 
     public AchievementsHandler(Activity activity) {
         super(activity);
         mAchievementCache = new HashMap<>();
-        mIncrementalCache = new HashMap<>();
+        mUnlockQueue = new ArrayList<>();
 
-        mAchievementsToUnlock = new ArrayList<>();
+        gson = new GsonBuilder().serializeNulls().create();
     }
 
     @JavascriptInterface
@@ -73,11 +75,17 @@ public class AchievementsHandler extends AbstractHandler<AchievementsClient> {
     public void unlockAchievement(String achievementId) {
         if (mClient != null) {
             mClient.unlock(achievementId);
-            mAchievementCache.put(achievementId, true);
         } else if (!mAchievementCache.isEmpty()) {
-            if (!mAchievementCache.get(achievementId)) {
-                mAchievementCache.put(achievementId, true);
-                mAchievementsToUnlock.add(achievementId);
+            AchievementShell shell = mAchievementCache.get(achievementId);
+
+            if (shell != null) {
+                if (!shell.isUnlocked()) {
+                    shell.state = Achievement.STATE_UNLOCKED;
+
+                    mUnlockQueue.add(shell.id);
+
+                    mAchievementCache.put(achievementId, shell);
+                }
             }
         }
     }
@@ -87,21 +95,37 @@ public class AchievementsHandler extends AbstractHandler<AchievementsClient> {
         if (mClient != null) {
             mClient.increment(achievementId, amountToIncrement);
         } else if (!mAchievementCache.isEmpty()) {
-            if (!mAchievementCache.get(achievementId)) {
-                IncrementalAchievementShell shell = mIncrementalCache.get(achievementId);
+            AchievementShell shell = mAchievementCache.get(achievementId);
 
-                shell.currentSteps += amountToIncrement;
+            if (shell != null) {
+                if (shell.isIncremental() && !shell.isUnlocked()) {
+                    shell.currentSteps += amountToIncrement;
 
-                if (shell.currentSteps >= shell.stepsToUnlock) {
-                    mAchievementCache.put(achievementId, true);
-                    mAchievementsToUnlock.add(achievementId);
+                    mAchievementCache.put(achievementId, shell);
+
+                    if (shell.currentSteps >= shell.stepsToUnlock) {
+                        unlockAchievement(achievementId);
+                    }
                 }
             }
         }
     }
 
-    public void cacheAchievements() {
-        mClient.load(true)
+    @JavascriptInterface
+    public String getAllAchievementDataAsJSON() {
+        return (!mAchievementCache.isEmpty()) ? gson.toJson(mAchievementCache.values().toArray())
+                : null;
+    }
+
+    @JavascriptInterface
+    public String getAchievementDataAsJSON(String achievementId) {
+        AchievementShell achievement = mAchievementCache.get(achievementId);
+
+        return (achievement != null) ? gson.toJson(achievement) : null;
+    }
+
+    public void cacheAchievements(boolean forceReload) {
+        mClient.load(forceReload)
                 .addOnCompleteListener(new OnCompleteListener<AnnotatedData<AchievementBuffer>>() {
             @Override
             public void onComplete(@NonNull Task<AnnotatedData<AchievementBuffer>> task) {
@@ -110,49 +134,60 @@ public class AchievementsHandler extends AbstractHandler<AchievementsClient> {
                 int bufferSize = achievementBuffer.getCount();
 
                 for (int i = 0; i < bufferSize; i++) {
-                    Achievement achievement = achievementBuffer.get(i);
+                    Achievement achievement = achievementBuffer.get(i).freeze();
+                    AchievementShell shell = new AchievementShell(achievement);
 
-                    mAchievementList.add(achievement.freeze());
+                    mAchievementCache.put(shell.id, shell);
                 }
-
                 achievementBuffer.release();
             }
         });
-        sortAchievements(mAchievementList);
     }
 
     public void unlockCachedAchievements() {
-        if ((mClient != null) && !mAchievementsToUnlock.isEmpty()) {
-            for (String id : mAchievementsToUnlock) {
-                mClient.unlock(id);
-            }
-
-            mAchievementsToUnlock.clear();
-        }
-    }
-
-    private void sortAchievements(List<Achievement> achievementList) {
-        for (Achievement achievement : achievementList) {
-            String id = achievement.getAchievementId();
-            boolean unlocked = (achievement.getState() == Achievement.STATE_UNLOCKED);
-
-            mAchievementCache.put(id, unlocked);
-
-            if (achievement.getType() == Achievement.TYPE_INCREMENTAL) {
-                int steps = achievement.getCurrentSteps();
-                int total = achievement.getTotalSteps();
-
-                IncrementalAchievementShell shell = new IncrementalAchievementShell();
-                shell.currentSteps = steps;
-                shell.stepsToUnlock = total;
-
-                mIncrementalCache.put(id, shell);
+        if (!mUnlockQueue.isEmpty()) {
+            for (String achievementId : mUnlockQueue) {
+                unlockAchievement(achievementId);
             }
         }
     }
 
-    private class IncrementalAchievementShell {
-        int currentSteps = 0;
-        int stepsToUnlock = 0;
+    private class AchievementShell {
+        String id;
+        String name;
+        String desc;
+        Uri    revealedImageUri;
+        Uri    unlockedImageUri;
+        int    state;
+        int    type;
+        int    currentSteps = 0;
+        int    stepsToUnlock = 0;
+
+        AchievementShell(Achievement achievement) {
+            id = achievement.getAchievementId();
+            name = achievement.getName();
+            desc = achievement.getDescription();
+            revealedImageUri = achievement.getRevealedImageUri();
+            unlockedImageUri = achievement.getUnlockedImageUri();
+            state = achievement.getState();
+            type = achievement.getType();
+
+            if (type == Achievement.TYPE_INCREMENTAL) {
+                currentSteps = achievement.getCurrentSteps();
+                stepsToUnlock = achievement.getTotalSteps();
+            }
+        }
+
+        boolean isUnlocked() {
+            return (type == Achievement.STATE_UNLOCKED);
+        }
+
+        boolean isRevealed() {
+            return (type == Achievement.STATE_REVEALED);
+        }
+
+        boolean isIncremental() {
+            return (type == Achievement.TYPE_INCREMENTAL);
+        }
     }
 }
