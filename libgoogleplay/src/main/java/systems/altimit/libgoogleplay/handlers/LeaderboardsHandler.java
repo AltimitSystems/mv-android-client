@@ -27,6 +27,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
  * Created by mgjus on 3/7/2018.
  */
 public class LeaderboardsHandler extends AbstractHandler<LeaderboardsClient> {
+    public static final String INTERFACE_NAME = "__google_play_leaderboards";
+
     private static final int RC_LEADERBOARD_UI = 9004;
 
     public LeaderboardsHandler(Activity activity) {

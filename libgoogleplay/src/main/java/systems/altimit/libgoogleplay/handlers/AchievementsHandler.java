@@ -38,8 +38,11 @@ import java.util.Map;
  * Created by mgjus on 3/7/2018.
  */
 public class AchievementsHandler extends AbstractHandler<AchievementsClient> {
+    public static final String INTERFACE_NAME = "__google_play_achievements";
+
     private static final int RC_ACHIEVEMENT_UI = 9003;
 
+    private List<Achievement> mAchievementList = new ArrayList<>();
     private Map<String, Boolean> mAchievementCache;
     private Map<String, IncrementalAchievementShell> mIncrementalCache;
 
@@ -104,20 +107,18 @@ public class AchievementsHandler extends AbstractHandler<AchievementsClient> {
             public void onComplete(@NonNull Task<AnnotatedData<AchievementBuffer>> task) {
                 AchievementBuffer achievementBuffer = task.getResult().get();
 
-                List<Achievement> mAchievementList = new ArrayList<>();
-
                 int bufferSize = achievementBuffer.getCount();
 
                 for (int i = 0; i < bufferSize; i++) {
                     Achievement achievement = achievementBuffer.get(i);
 
-                    mAchievementList.add(achievement);
+                    mAchievementList.add(achievement.freeze());
                 }
 
                 achievementBuffer.release();
-                sortAchievements(mAchievementList);
             }
         });
+        sortAchievements(mAchievementList);
     }
 
     public void unlockCachedAchievements() {

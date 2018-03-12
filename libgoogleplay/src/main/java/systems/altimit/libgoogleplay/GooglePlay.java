@@ -48,7 +48,7 @@ import systems.altimit.libgoogleplay.handlers.LeaderboardsHandler;
  * Created by mgjus on 3/7/2018.
  */
 public class GooglePlay extends AbstractExtension {
-    private static final String INTERFACE_NAME = "__google_play";
+    private static final String INTERFACE_NAME = "__google_play_main";
 
     private static final int RC_SIGN_IN = 9001;
 
@@ -92,9 +92,9 @@ public class GooglePlay extends AbstractExtension {
         mEventsHandler = new EventsHandler(mParentActivity);
 
         mInterfaces.put(INTERFACE_NAME, this);
-        mInterfaces.put(INTERFACE_NAME, mAchievementsHandler);
-        mInterfaces.put(INTERFACE_NAME, mLeaderboardsHandler);
-        mInterfaces.put(INTERFACE_NAME, mEventsHandler);
+        mInterfaces.put(AchievementsHandler.INTERFACE_NAME, mAchievementsHandler);
+        mInterfaces.put(LeaderboardsHandler.INTERFACE_NAME, mLeaderboardsHandler);
+        mInterfaces.put(EventsHandler.INTERFACE_NAME, mEventsHandler);
     }
 
     @Override
