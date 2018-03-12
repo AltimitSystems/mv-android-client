@@ -72,10 +72,12 @@ public class AchievementsHandler extends AbstractHandler<AchievementsClient> {
     }
 
     @JavascriptInterface
-    public void unlockAchievement(String achievementId) {
+    public String unlockAchievement(String achievementId) {
         if (mClient != null) {
             mClient.unlock(achievementId);
-        } else if (!mAchievementCache.isEmpty()) {
+        }
+
+        if (!mAchievementCache.isEmpty()) {
             AchievementShell shell = mAchievementCache.get(achievementId);
 
             if (shell != null) {
@@ -85,16 +87,22 @@ public class AchievementsHandler extends AbstractHandler<AchievementsClient> {
                     mUnlockQueue.add(shell.id);
 
                     mAchievementCache.put(achievementId, shell);
+
+                    return gson.toJson(shell);
                 }
             }
         }
+
+        return null;
     }
 
     @JavascriptInterface
-    public void incrementAchievementStep(String achievementId, int amountToIncrement) {
+    public String incrementAchievementStep(String achievementId, int amountToIncrement) {
         if (mClient != null) {
             mClient.increment(achievementId, amountToIncrement);
-        } else if (!mAchievementCache.isEmpty()) {
+        }
+
+        if (!mAchievementCache.isEmpty()) {
             AchievementShell shell = mAchievementCache.get(achievementId);
 
             if (shell != null) {
@@ -104,24 +112,21 @@ public class AchievementsHandler extends AbstractHandler<AchievementsClient> {
                     mAchievementCache.put(achievementId, shell);
 
                     if (shell.currentSteps >= shell.stepsToUnlock) {
-                        unlockAchievement(achievementId);
+                        return unlockAchievement(achievementId);
                     }
+
+                    return gson.toJson(shell);
                 }
             }
         }
+
+        return null;
     }
 
     @JavascriptInterface
     public String getAllAchievementDataAsJSON() {
         return (!mAchievementCache.isEmpty()) ? gson.toJson(mAchievementCache.values().toArray())
                 : null;
-    }
-
-    @JavascriptInterface
-    public String getAchievementDataAsJSON(String achievementId) {
-        AchievementShell achievement = mAchievementCache.get(achievementId);
-
-        return (achievement != null) ? gson.toJson(achievement) : null;
     }
 
     public void cacheAchievements(boolean forceReload) {
