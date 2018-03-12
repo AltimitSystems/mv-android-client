@@ -25,7 +25,7 @@ import com.google.android.gms.games.EventsClient;
  * Created by mgjus on 3/7/2018.
  */
 public class EventsHandler extends AbstractHandler<EventsClient> {
-    public static final String INTERFACE_NAME = "__google_play_quests";
+    public static final String INTERFACE_NAME = "__google_play_events";
 
     public EventsHandler(Activity activity) {
         super(activity);
