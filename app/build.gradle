@@ -66,6 +66,12 @@ android {
         zz_crosswalk {
             dimension "mv_android_client"
             minSdkVersion 16
+
+            configurations.all {
+                resolutionStrategy {
+                    force 'com.android.support:support-v4:27.1.0'
+                }
+            }
         }
     }
 }
@@ -77,7 +83,7 @@ repositories {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     implementation 'com.android.support:appcompat-v7:27.1.0'
     implementation project(':clientapi')
