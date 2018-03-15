@@ -30,6 +30,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.auth.api.signin.GoogleSignInStatusCodes;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.games.Games;
@@ -196,7 +197,10 @@ public class GooglePlay extends AbstractExtension {
             case CommonStatusCodes.TIMEOUT:
                 message = mParentActivity.getString(R.string.api_timeout);
                 break;
-                default:
+            case GoogleSignInStatusCodes.SIGN_IN_CURRENTLY_IN_PROGRESS:
+                // we ignore this one
+                return;
+            default:
                     message = mParentActivity.getString(R.string.api_unspecified) + statusCode;
                     break;
         }
