@@ -18,8 +18,6 @@ package systems.altimit.libgoogleplay.handlers;
 
 import android.app.Activity;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-
 /**
  * Created by mgjus on 3/7/2018.
  */
@@ -32,11 +30,7 @@ abstract class AbstractHandler<T> {
         mParentActivity =  activity;
     }
 
-    public void setClient(T achievementsClient) {
-        mClient = achievementsClient;
-    }
-
-    boolean isSignedIn() {
-        return GoogleSignIn.getLastSignedInAccount(mParentActivity) != null;
+    public void setClient(T serviceClient) {
+        mClient = serviceClient;
     }
 }
