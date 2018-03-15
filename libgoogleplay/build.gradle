@@ -17,8 +17,11 @@
 apply plugin: 'com.android.library'
 
 android {
-    //def ALLOW_CLOUD_SAVE = false // allow cloud save functionality, if desired
-    def ALLOW_AUTO_SIGNIN = true // toggle as per 1.1 from https://developers.google.com/games/services/checklist#1_sign-in
+    def ENABLE_ACHIEVEMENTS = true
+    def ENABLE_EVENTS =       true
+    def ENABLE_LEADERBOARDS = true
+    //def ENABLE_CLOUD_SAVE =   false // allow cloud save functionality, if desired
+    def ENABLE_AUTO_SIGNIN =  true // toggle as per 1.1 from https://developers.google.com/games/services/checklist#1_sign-in
                                  // as you CANNOT have auto sign-in if children under 13 are an
                                  // intended audience
 
@@ -31,8 +34,11 @@ android {
 
     buildTypes {
         buildTypes.each { buildType ->
-            //buildType.buildConfigField "boolean",  "ALLOW_CLOUD_SAVE", String.valueOf(ALLOW_CLOUD_SAVE)
-            buildType.buildConfigField "boolean",  "ALLOW_AUTO_SIGNIN", String.valueOf(ALLOW_AUTO_SIGNIN)
+            buildType.buildConfigField "boolean", "ENABLE_ACHIEVEMENTS", String.valueOf(ENABLE_ACHIEVEMENTS)
+            buildType.buildConfigField "boolean", "ENABLE_EVENTS", String.valueOf(ENABLE_EVENTS)
+            buildType.buildConfigField "boolean", "ENABLE_LEADERBOARDS", String.valueOf(ENABLE_LEADERBOARDS)
+            //buildType.buildConfigField "boolean",  "ENABLE_CLOUD_SAVE", String.valueOf(ENABLE_CLOUD_SAVE)
+            buildType.buildConfigField "boolean",  "ENABLE_AUTO_SIGNIN", String.valueOf(ENABLE_AUTO_SIGNIN)
         }
     }
 }

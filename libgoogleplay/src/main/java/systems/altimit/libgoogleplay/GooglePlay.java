@@ -59,11 +59,15 @@ public class GooglePlay extends AbstractExtension {
 
     private GoogleSignInClient mGoogleSignInClient;
 
-    private AchievementsHandler mAchievementsHandler;
-    private LeaderboardsHandler mLeaderboardsHandler;
-    private EventsHandler mEventsHandler;
+    private AchievementsHandler mAchievementsHandler = null;
+    private LeaderboardsHandler mLeaderboardsHandler = null;
+    private EventsHandler mEventsHandler = null;
 
+    private boolean achievementsEnabled;
+    private boolean eventsEnabled;
+    private boolean leaderboardsEnabled;
     private boolean autoSignInEnabled;
+
     private boolean manualSignOut = false;
     private boolean firstStart = true;
 
@@ -81,7 +85,10 @@ public class GooglePlay extends AbstractExtension {
                     .setNeutralButton(android.R.string.ok, null).create().show();
         }
 
-        autoSignInEnabled = BuildConfig.ALLOW_AUTO_SIGNIN;
+        achievementsEnabled = BuildConfig.ENABLE_ACHIEVEMENTS;
+        eventsEnabled = BuildConfig.ENABLE_EVENTS;
+        leaderboardsEnabled = BuildConfig.ENABLE_LEADERBOARDS;
+        autoSignInEnabled = BuildConfig.ENABLE_AUTO_SIGNIN;
 
         GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions
                 .Builder(GoogleSignInOptions.DEFAULT_GAMES_SIGN_IN)
@@ -89,14 +96,22 @@ public class GooglePlay extends AbstractExtension {
 
         mGoogleSignInClient = GoogleSignIn.getClient(mParentActivity, googleSignInOptions);
 
-        mAchievementsHandler = new AchievementsHandler(mParentActivity);
-        mLeaderboardsHandler = new LeaderboardsHandler(mParentActivity);
-        mEventsHandler = new EventsHandler(mParentActivity);
-
         mInterfaces.put(INTERFACE_NAME, this);
-        mInterfaces.put(AchievementsHandler.INTERFACE_NAME, mAchievementsHandler);
-        mInterfaces.put(LeaderboardsHandler.INTERFACE_NAME, mLeaderboardsHandler);
-        mInterfaces.put(EventsHandler.INTERFACE_NAME, mEventsHandler);
+
+        if (achievementsEnabled) {
+            mAchievementsHandler = new AchievementsHandler(mParentActivity);
+            mInterfaces.put(AchievementsHandler.INTERFACE_NAME, mAchievementsHandler);
+        }
+
+        if (eventsEnabled) {
+            mEventsHandler = new EventsHandler(mParentActivity);
+            mInterfaces.put(EventsHandler.INTERFACE_NAME, mEventsHandler);
+        }
+
+        if (leaderboardsEnabled) {
+            mLeaderboardsHandler = new LeaderboardsHandler(mParentActivity);
+            mInterfaces.put(LeaderboardsHandler.INTERFACE_NAME, mLeaderboardsHandler);
+        }
     }
 
     @Override
@@ -237,29 +252,54 @@ public class GooglePlay extends AbstractExtension {
     }
 
     private void onConnected(GoogleSignInAccount googleSignInAccount) {
-        mAchievementsHandler.setClient(Games.getAchievementsClient(mParentActivity,
-                googleSignInAccount));
-        mLeaderboardsHandler.setClient(Games.getLeaderboardsClient(mParentActivity,
-                googleSignInAccount));
-        mEventsHandler.setClient(Games.getEventsClient(mParentActivity, googleSignInAccount));
+        if (achievementsEnabled) {
+            mAchievementsHandler.setClient(Games.getAchievementsClient(mParentActivity,
+                    googleSignInAccount));
+            mAchievementsHandler.unlockCachedAchievements();
+        }
 
-        mAchievementsHandler.unlockCachedAchievements();
-        mEventsHandler.incrementCachedEvents();
+        if (eventsEnabled) {
+            mEventsHandler.setClient(Games.getEventsClient(mParentActivity, googleSignInAccount));
+            mEventsHandler.incrementCachedEvents();
+        }
+
+        if (leaderboardsEnabled) {
+            mLeaderboardsHandler.setClient(Games.getLeaderboardsClient(mParentActivity,
+                    googleSignInAccount));
+        }
 
         if (firstStart) {
-            mAchievementsHandler.cacheAchievements(true);
-            mEventsHandler.cacheEvents(true);
+            if (achievementsEnabled) {
+                mAchievementsHandler.cacheAchievements(true);
+            }
+
+            if (eventsEnabled) {
+                mEventsHandler.cacheEvents(true);
+            }
 
             firstStart = false;
         } else {
-            mAchievementsHandler.cacheAchievements(false);
-            mEventsHandler.cacheEvents(false);
+            if (achievementsEnabled) {
+                mAchievementsHandler.cacheAchievements(false);
+            }
+
+            if (eventsEnabled) {
+                mEventsHandler.cacheEvents(false);
+            }
         }
     }
 
     private void onDisconnected() {
-        mAchievementsHandler.setClient(null);
-        mLeaderboardsHandler.setClient(null);
-        mEventsHandler.setClient(null);
+        if (achievementsEnabled) {
+            mAchievementsHandler.setClient(null);
+        }
+
+        if (eventsEnabled) {
+            mEventsHandler.setClient(null);
+        }
+
+        if (leaderboardsEnabled) {
+            mLeaderboardsHandler.setClient(null);
+        }
     }
 }
