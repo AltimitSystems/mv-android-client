@@ -20,7 +20,8 @@ apply plugin: 'com.android.application'
  * Extensions
  */
 def EXTENSIONS = [
-        [ module: 'libandroidapi', extension: 'systems.altimit.libandroidapi.AndroidAPI' ]
+        [ module: 'libandroidapi', extension: 'systems.altimit.libandroidapi.AndroidAPI' ],
+        //[ module: 'libgoogleplay', extension: 'systems.altimit.libgoogleplay.GooglePlay' ],
 ]
 
 android {

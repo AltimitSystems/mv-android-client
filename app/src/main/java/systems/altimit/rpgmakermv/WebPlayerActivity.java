@@ -116,11 +116,31 @@ public class WebPlayerActivity extends Activity {
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        for (AbstractExtension extension : mExtensions) {
+            extension.onStart();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        for (AbstractExtension extension : mExtensions) {
+            extension.onStop();
+        }
+    }
+
+    @Override
     protected void onPause() {
         super.onPause();
         if (mPlayer != null) {
             mPlayer.pauseTimers();
             mPlayer.onHide();
+
+            for (AbstractExtension extension : mExtensions) {
+                extension.onPause();
+            }
         }
     }
 
@@ -131,6 +151,10 @@ public class WebPlayerActivity extends Activity {
         if (mPlayer != null) {
             mPlayer.resumeTimers();
             mPlayer.onShow();
+
+            for (AbstractExtension extension : mExtensions) {
+                extension.onResume();
+            }
         }
     }
 
@@ -139,6 +163,18 @@ public class WebPlayerActivity extends Activity {
         super.onDestroy();
         if (mPlayer != null) {
             mPlayer.onDestroy();
+
+            for (AbstractExtension extension : mExtensions) {
+                extension.onDestroy();
+            }
+        }
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        for (AbstractExtension extension : mExtensions) {
+            extension.onRestart();
         }
     }
 
