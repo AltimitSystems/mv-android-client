@@ -125,23 +125,21 @@ public class WebPlayerActivity extends Activity {
 
     @Override
     protected void onStop() {
-        super.onStop();
         for (AbstractExtension extension : mExtensions) {
             extension.onStop();
         }
+        super.onStop();
     }
 
     @Override
     protected void onPause() {
-        super.onPause();
-        if (mPlayer != null) {
-            mPlayer.pauseTimers();
-            mPlayer.onHide();
+        mPlayer.pauseTimers();
+        mPlayer.onHide();
 
-            for (AbstractExtension extension : mExtensions) {
-                extension.onPause();
-            }
+        for (AbstractExtension extension : mExtensions) {
+            extension.onPause();
         }
+        super.onPause();
     }
 
     @Override
@@ -161,12 +159,10 @@ public class WebPlayerActivity extends Activity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mPlayer != null) {
-            mPlayer.onDestroy();
+        mPlayer.onDestroy();
 
-            for (AbstractExtension extension : mExtensions) {
-                extension.onDestroy();
-            }
+        for (AbstractExtension extension : mExtensions) {
+            extension.onDestroy();
         }
     }
 
