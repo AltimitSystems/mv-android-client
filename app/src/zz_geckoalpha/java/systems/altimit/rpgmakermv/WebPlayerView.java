@@ -111,12 +111,13 @@ public class WebPlayerView extends GeckoView {
         public void loadUrl(String url, Runnable onLoad) {
             mOnPageFinishedActions.add(onLoad);
             mWebView.getSession().loadUri(url);
+            onPageFinished();
         }
 
         @Override
         @SuppressLint({"JavascriptInterface", "AddJavascriptInterface"})
         public void addJavascriptInterface(Object object, String name) {
-//            mWebView.getSession().addJavascriptInterface(object, name);
+            // TODO
         }
 
         @Override
@@ -127,11 +128,13 @@ public class WebPlayerView extends GeckoView {
         @Override
         public void loadData(String data) {
             mWebView.getSession().loadData(data.getBytes(), "text/html");
+            onPageFinished();
         }
 
         @Override
         public void evaluateJavascript(String script) {
             mWebView.getSession().loadUri("javascript:" + script);
+            onPageFinished();
         }
 
         @Override
@@ -141,7 +144,7 @@ public class WebPlayerView extends GeckoView {
 
         @Override
         public void removeJavascriptInterface(String name) {
-//            mWebView.removeJavascriptInterface(name);
+            // TODO
         }
 
         @Override

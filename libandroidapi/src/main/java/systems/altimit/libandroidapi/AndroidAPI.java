@@ -18,7 +18,6 @@ package systems.altimit.libandroidapi;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.support.annotation.NonNull;
 import android.webkit.JavascriptInterface;
 
 import java.io.BufferedReader;
@@ -81,7 +80,6 @@ public class AndroidAPI extends AbstractExtension {
      */
     private static final class Util {
 
-        @NonNull
         private static String readInputStream(InputStream inputStream) {
             StringBuilder text = new StringBuilder();
             BufferedReader br = null;

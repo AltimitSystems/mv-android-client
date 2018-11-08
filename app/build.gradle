@@ -61,21 +61,16 @@ android {
             minSdkVersion 14
         }
 
+        // WARNING: Gecko engine is currently not functional
         zz_geckoalpha {
             dimension "mv_android_client"
-            minSdkVersion 21
+            minSdkVersion 26
         }
 
         // WARNING: As of February 2017 Crosswalk is no longer maintained https://crosswalk-project.org/blog/crosswalk-final-release.html
         zz_crosswalk {
             dimension "mv_android_client"
             minSdkVersion 16
-
-            configurations.all {
-                resolutionStrategy {
-                    force 'com.android.support:support-v4:27.1.0'
-                }
-            }
         }
     }
 }
