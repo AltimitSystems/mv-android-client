@@ -31,7 +31,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 /**
- * Created by felixjones on 28/04/2017.
+ * Created by felixjones on 07/10/2018.
  */
 public class WebPlayerView extends GeckoView {
 
@@ -91,7 +91,6 @@ public class WebPlayerView extends GeckoView {
 
         private WebPlayerView mWebView;
         private Queue<Runnable> mOnPageFinishedActions;
-        private JavascriptBridge
 
         private WebPlayer(WebPlayerView webView) {
             mWebView = webView;
