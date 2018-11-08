@@ -25,11 +25,10 @@ android {
                                  // as you CANNOT have auto sign-in if children under 13 are an
                                  // intended audience
 
-    compileSdkVersion 27
+    compileSdkVersion 28
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 27
     }
 
     buildTypes {
@@ -47,8 +46,8 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation project(':clientapi')
 
-    implementation 'com.google.android.gms:play-services-games:15.0.0'
-    implementation 'com.google.android.gms:play-services-auth:15.0.0'
+    implementation 'com.google.android.gms:play-services-games:16.0.0'
+    implementation 'com.google.android.gms:play-services-auth:16.0.1'
 
     implementation 'com.google.code.gson:gson:2.8.2'
 }
