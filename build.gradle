@@ -18,6 +18,8 @@ buildscript {
     repositories {
         jcenter()
         google()
+
+        mavenCentral() //iap
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.2.1'
@@ -32,6 +34,8 @@ allprojects {
         maven {
             url 'https://maven.mozilla.org/maven2'
         }
+
+        mavenCentral() //iap
     }
 }
 

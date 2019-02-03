@@ -87,6 +87,12 @@ public class WebPlayerView extends WebView {
             webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
         }
 
+
+        //fix font size
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
+            webSettings.setTextZoom(100);
+        }
+
         setWebChromeClient(new ChromeClient());
         setWebViewClient(new ViewClient());
     }

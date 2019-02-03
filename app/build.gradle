@@ -58,7 +58,7 @@ android {
     productFlavors {
         webview {
             dimension "mv_android_client"
-            minSdkVersion 14
+            minSdkVersion 26
         }
 
         // WARNING: Gecko engine is currently not functional
@@ -85,6 +85,7 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     implementation 'com.android.support:appcompat-v7:28.0.0'
+    implementation 'com.anjlab.android.iab.v3:library:1.0.44' //iap
     implementation project(':clientapi')
 
     zz_geckoalphaImplementation 'org.mozilla.geckoview:geckoview-beta-armeabi-v7a:+'

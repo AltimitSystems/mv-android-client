@@ -23,9 +23,16 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.util.Base64;
 import android.view.View;
+import android.webkit.JavascriptInterface;
+import android.widget.Toast;
+
+import com.anjlab.android.iab.v3.BillingProcessor;
+import com.anjlab.android.iab.v3.TransactionDetails;
 
 import java.io.File;
 import java.nio.charset.Charset;
@@ -39,7 +46,7 @@ import systems.altimit.clientapi.AbstractExtension;
 /**
  * Created by felixjones on 28/04/2017.
  */
-public class WebPlayerActivity extends Activity {
+public class WebPlayerActivity extends Activity implements BillingProcessor.IBillingHandler {
 
     private static final String TOUCH_INPUT_ON_CANCEL = "TouchInput._onCancel();";
 
@@ -48,12 +55,20 @@ public class WebPlayerActivity extends Activity {
     private AlertDialog mQuitDialog;
     private int mSystemUiVisibility;
 
+    //iap
+    private BillingProcessor bp;
+    private static final String PRODUCT_ID = "SKU";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (BuildConfig.BACK_BUTTON_QUITS) {
             createQuitDialog();
         }
+
+        //iap
+        bp = BillingProcessor.newBillingProcessor(this, "LICENSE_KEY", this);
+        bp.initialize();
 
         mSystemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
 
@@ -69,6 +84,9 @@ public class WebPlayerActivity extends Activity {
         }
 
         mPlayer = PlayerHelper.create(this);
+
+        //iap
+        mPlayer.addJavascriptInterface(this, "IAP");
 
         mExtensions = new ArrayList<>();
         if ("webview".equals(BuildConfig.FLAVOR)) {
@@ -158,6 +176,10 @@ public class WebPlayerActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        //iap
+        if (bp != null) {
+            bp.release();
+        }
         super.onDestroy();
         mPlayer.onDestroy();
 
@@ -178,6 +200,12 @@ public class WebPlayerActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         for (AbstractExtension extension : mExtensions) {
             extension.onActivityResult(requestCode, resultCode, data);
+        }
+
+
+        //iap
+        if (!bp.handleActivityResult(requestCode, resultCode, data)) {
+            super.onActivityResult(requestCode, resultCode, data);
         }
     }
 
@@ -223,6 +251,49 @@ public class WebPlayerActivity extends Activity {
             return true;
         }
         return false;
+    }
+
+    //iap
+    @Override
+    public void onProductPurchased(@NonNull String productId, @Nullable TransactionDetails details) {
+        finish();
+        startActivity(getIntent());
+    }
+
+    @Override
+    public void onPurchaseHistoryRestored() {
+
+    }
+
+    @Override
+    public void onBillingError(int errorCode, @Nullable Throwable error) {
+        finish();
+        startActivity(getIntent());
+    }
+
+    @Override
+    public void onBillingInitialized() {
+        // purchase verification
+        bp.loadOwnedPurchasesFromGoogle();
+        if (bp.isPurchased(PRODUCT_ID)) {
+            showToast("Full version");
+        } else {
+            showToast("Demo version");
+        }
+    }
+
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+    }
+
+    @JavascriptInterface
+    public void purchaseGame() {
+        bp.purchase(this, PRODUCT_ID);
+    }
+
+    @JavascriptInterface
+    public boolean purchased() {
+        return bp.isPurchased(PRODUCT_ID);
     }
 
     /**
