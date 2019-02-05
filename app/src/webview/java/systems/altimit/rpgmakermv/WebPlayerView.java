@@ -74,7 +74,6 @@ public class WebPlayerView extends WebView {
         webSettings.setDatabasePath(context.getDir("database", Context.MODE_PRIVATE).getPath());
         webSettings.setDomStorageEnabled(true);
         webSettings.setLoadsImagesAutomatically(true);
-        webSettings.setTextZoom(100);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             webSettings.setAllowFileAccessFromFileURLs(true);
@@ -83,11 +82,6 @@ public class WebPlayerView extends WebView {
         
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2) {
             webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
-        }        
-        
-        //fix font size
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
-            webSettings.setTextZoom(100);
         }
 
         setWebChromeClient(new ChromeClient());
