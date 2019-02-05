@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Altimit Community Contributors
+ * Copyright (c) 2017-2019 Altimit Community Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ public interface Player {
 
     void setKeepScreenOn();
     View getView();
-    void loadUrl(String url, Runnable onLoad);
+    void loadUrl(String url);
     void addJavascriptInterface(Object object, String name);
     Context getContext();
     void loadData(String data);

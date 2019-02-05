@@ -32,12 +32,12 @@
     </string>
 
     <string name="webview_default_page">
-        PCFbQ0RBVEFbIDwhRE9DVFlQRSBodG1sPg0KPGh0bWw+DQo8aGVhZD4NCjxtZXRhIGNoYXJzZXQ9VVRGLTg+DQo8c3R5
-        bGU+Ym9keXtiYWNrZ3JvdW5kLWNvbG9yOmJsYWNrfSNjb3B5cmlnaHR7cG9zaXRpb246Zml4ZWQ7Ym90dG9tOjA7cmln
-        aHQ6MDtjb2xvcjp3aGl0ZTtmb250LWZhbWlseTpDb25zb2xhcyxNb25hY28sTHVjaWRhIENvbnNvbGUsTGliZXJhdGlv
-        biBNb25vLERlamFWdSBTYW5zIE1vbm8sQml0c3RyZWFtIFZlcmEgU2FucyBNb25vLENvdXJpZXIgTmV3LG1vbm9zcGFj
-        ZX08L3N0eWxlPg0KPC9oZWFkPg0KPGJvZHkgb25sb2FkPWJvb3Quc3RhcnQoKT4NCjxkaXYgaWQ9Y29weXJpZ2h0PiYj
-        MTY5OyAmIzkyMztMVElNSVQgQ09NTVVOSVRZIENPTlRSSUJVVE9SUzwvZGl2Pg0KPC9ib2R5Pg0KPC9odG1sPg0KXV0+
+        PCFET0NUWVBFIGh0bWw+CjxodG1sPgo8aGVhZD4KPG1ldGEgY2hhcnNldD1VVEYtOD4KPHN0eWxlPmJvZHl7YmFja2dy
+        b3VuZC1jb2xvcjpibGFja30jY29weXJpZ2h0e3Bvc2l0aW9uOmZpeGVkO2JvdHRvbTowO3JpZ2h0OjA7Y29sb3I6d2hp
+        dGU7Zm9udC1mYW1pbHk6Q29uc29sYXMsTW9uYWNvLEx1Y2lkYSBDb25zb2xlLExpYmVyYXRpb24gTW9ubyxEZWphVnUg
+        U2FucyBNb25vLEJpdHN0cmVhbSBWZXJhIFNhbnMgTW9ubyxDb3VyaWVyIE5ldyxtb25vc3BhY2V9PC9zdHlsZT4KPC9o
+        ZWFkPgo8Ym9keSBvbmxvYWQ9Ym9vdC5zdGFydCgpPgo8ZGl2IGlkPWNvcHlyaWdodD4mIzE2OTsgJiM5MjM7TFRJTUlU
+        IENPTU1VTklUWSBDT05UUklCVVRPUlM8L2Rpdj4KPC9ib2R5Pgo8L2h0bWw+
     </string>
 
     <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">

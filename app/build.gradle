@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Altimit Community Contributors
+ * Copyright (c) 2017-2019 Altimit Community Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +16,6 @@
 
 apply plugin: 'com.android.application'
 
-/**
- * Extensions
- */
-def EXTENSIONS = [
-        [ module: 'libandroidapi', extension: 'systems.altimit.libandroidapi.AndroidAPI' ],
-        //[ module: 'libgoogleplay', extension: 'systems.altimit.libgoogleplay.GooglePlay' ],
-]
-
 android {
 
     /**
@@ -33,7 +25,6 @@ android {
     def SHOW_FPS            = false // Display the FPS monitor?
 
     compileSdkVersion 28
-    buildToolsVersion '28.0.3'
 
     defaultConfig {
 
@@ -49,7 +40,6 @@ android {
         buildTypes.each { buildType ->
             buildType.buildConfigField "boolean",  "BACK_BUTTON_QUITS", String.valueOf(BACK_BUTTON_QUITS)
             buildType.buildConfigField "boolean",  "SHOW_FPS",          String.valueOf(SHOW_FPS)
-            buildType.buildConfigField "String[]", "EXTENSION_CLASSES", "{" + EXTENSIONS.collect {"\"${it.extension}\""}.join(",")  + "}"
         }
     }
 
@@ -59,18 +49,24 @@ android {
         webview {
             dimension "mv_android_client"
             minSdkVersion 14
+
+            buildConfigField "boolean", "BOOTSTRAP_INTERFACE", "true"
         }
 
         // WARNING: Gecko engine is currently not functional
         zz_geckoalpha {
             dimension "mv_android_client"
             minSdkVersion 26
+
+            buildConfigField "boolean", "BOOTSTRAP_INTERFACE", "false"
         }
 
         // WARNING: As of February 2017 Crosswalk is no longer maintained https://crosswalk-project.org/blog/crosswalk-final-release.html
         zz_crosswalk {
             dimension "mv_android_client"
             minSdkVersion 16
+
+            buildConfigField "boolean", "BOOTSTRAP_INTERFACE", "true"
         }
     }
 }
@@ -85,16 +81,8 @@ dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
 
     implementation 'com.android.support:appcompat-v7:28.0.0'
-    implementation project(':clientapi')
 
     zz_geckoalphaImplementation 'org.mozilla.geckoview:geckoview-beta-armeabi-v7a:+'
 
     zz_crosswalkImplementation 'org.xwalk:xwalk_core_library:23.53.589.4'
-
-    // Include any Client API Extensions
-    if (EXTENSIONS) {
-        EXTENSIONS.each { extension ->
-            implementation project(extension.module.startsWith(':') ? extension.module : ':' + extension.module)
-        }
-    }
 }

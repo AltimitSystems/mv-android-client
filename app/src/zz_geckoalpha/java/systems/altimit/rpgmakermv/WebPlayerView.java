@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017-2018 Altimit Community Contributors
+ * Copyright (c) 2017-2019 Altimit Community Contributors
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.util.AttributeSet;
+import android.util.Base64;
 import android.view.View;
 
 import org.mozilla.gecko.PrefsHelper;
@@ -90,11 +91,9 @@ public class WebPlayerView extends GeckoView {
     private static final class WebPlayer implements Player {
 
         private WebPlayerView mWebView;
-        private Queue<Runnable> mOnPageFinishedActions;
 
         private WebPlayer(WebPlayerView webView) {
             mWebView = webView;
-            mOnPageFinishedActions = new LinkedList<>();
         }
 
         @Override
@@ -108,10 +107,8 @@ public class WebPlayerView extends GeckoView {
         }
 
         @Override
-        public void loadUrl(String url, Runnable onLoad) {
-            mOnPageFinishedActions.add(onLoad);
+        public void loadUrl(String url) {
             mWebView.getSession().loadUri(url);
-            onPageFinished();
         }
 
         @Override
@@ -127,14 +124,12 @@ public class WebPlayerView extends GeckoView {
 
         @Override
         public void loadData(String data) {
-            mWebView.getSession().loadData(data.getBytes(), "text/html");
-            onPageFinished();
+            mWebView.getSession().loadData(Base64.decode(data, Base64.DEFAULT), "text/html");
         }
 
         @Override
         public void evaluateJavascript(String script) {
             mWebView.getSession().loadUri("javascript:" + script);
-            onPageFinished();
         }
 
         @Override
@@ -165,12 +160,6 @@ public class WebPlayerView extends GeckoView {
 
         @Override
         public void onDestroy() {
-        }
-
-        void onPageFinished() {
-            while (!mOnPageFinishedActions.isEmpty()) {
-                mOnPageFinishedActions.remove().run();
-            }
         }
 
     }
