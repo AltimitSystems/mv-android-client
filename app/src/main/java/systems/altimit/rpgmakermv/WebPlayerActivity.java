@@ -219,10 +219,12 @@ public class WebPlayerActivity extends Activity {
         @Override
         protected void onPrepare(boolean webgl, boolean webaudio, boolean showfps) {
             Context context = mPlayer.getContext();
-            if (webgl) {
+            if (webgl && !BuildConfig.FORCE_CANVAS) {
                 mURIBuilder = appendQuery(mURIBuilder, context.getString(R.string.query_webgl));
+            } else {
+                mURIBuilder = appendQuery(mURIBuilder, context.getString(R.string.query_canvas));
             }
-            if (!webaudio) {
+            if (!webaudio || BuildConfig.FORCE_NO_AUDIO) {
                 mURIBuilder = appendQuery(mURIBuilder, context.getString(R.string.query_noaudio));
             }
             if (showfps || BuildConfig.SHOW_FPS) {

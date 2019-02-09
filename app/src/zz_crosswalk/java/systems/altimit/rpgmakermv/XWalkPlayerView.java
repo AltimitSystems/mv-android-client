@@ -19,13 +19,18 @@ package systems.altimit.rpgmakermv;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.ViewGroup;
+import android.webkit.ValueCallback;
 
 import org.xwalk.core.XWalkResourceClient;
 import org.xwalk.core.XWalkSettings;
+import org.xwalk.core.XWalkUIClient;
 import org.xwalk.core.XWalkView;
 
 /**
@@ -55,14 +60,16 @@ public class XWalkPlayerView extends XWalkView {
         XWalkSettings webSettings = getSettings();
         webSettings.setAllowContentAccess(true);
         webSettings.setAllowFileAccess(true);
-        webSettings.setLoadsImagesAutomatically(true);
-        webSettings.setDomStorageEnabled(true);
-        webSettings.setDatabaseEnabled(true);
-
         webSettings.setAllowFileAccessFromFileURLs(true);
         webSettings.setAllowUniversalAccessFromFileURLs(true);
+        webSettings.setDatabaseEnabled(true);
+        webSettings.setDomStorageEnabled(true);
+        webSettings.setLoadsImagesAutomatically(true);
+        webSettings.setMediaPlaybackRequiresUserGesture(false);
+        webSettings.setSupportMultipleWindows(true);
 
         setResourceClient(new ResourceClient(this));
+        setUIClient(new UIClient(this));
     }
 
     @Override
@@ -77,6 +84,7 @@ public class XWalkPlayerView extends XWalkView {
     @SuppressLint("SetJavaScriptEnabled")
     private void enableJavascript() {
         XWalkSettings webSettings = getSettings();
+        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         webSettings.setJavaScriptEnabled(true);
     }
 
@@ -93,6 +101,33 @@ public class XWalkPlayerView extends XWalkView {
 
     public Player getPlayer() {
         return mPlayer;
+    }
+
+    /**
+     *
+     */
+    private class UIClient extends XWalkUIClient {
+
+        private UIClient(XWalkView view) {
+            super(view);
+        }
+
+        public boolean onCreateWindowRequested(XWalkView view, XWalkUIClient.InitiateBy initiator, ValueCallback<XWalkView> callback) {
+            final XWalkView dumbWV = new XWalkView(view.getContext());
+            dumbWV.setVisibility(View.INVISIBLE);
+            view.addView(dumbWV);
+            dumbWV.setResourceClient(new XWalkResourceClient (dumbWV) {
+                @Override
+                public void onLoadStarted(XWalkView view, String url) {
+                    ((ViewGroup) dumbWV.getParent()).removeView(view);
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    view.getContext().startActivity(browserIntent);
+                }
+            });
+            callback.onReceiveValue(dumbWV);
+            return true;
+        }
+
     }
 
     /**

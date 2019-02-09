@@ -19,6 +19,7 @@
     <string name="mv_project_index">//android_asset/www/index.html</string>
 
     <string name="query_webgl">webgl</string>
+    <string name="query_canvas">canvas</string>
     <string name="query_noaudio">noaudio</string>
     <string name="query_showfps">showfps</string>
 

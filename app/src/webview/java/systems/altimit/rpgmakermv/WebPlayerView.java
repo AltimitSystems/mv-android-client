@@ -19,8 +19,12 @@ package systems.altimit.rpgmakermv;
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
+import android.os.Message;
 import android.util.AttributeSet;
 import android.view.View;
 import android.webkit.ConsoleMessage;
@@ -74,12 +78,17 @@ public class WebPlayerView extends WebView {
         webSettings.setDatabasePath(context.getDir("database", Context.MODE_PRIVATE).getPath());
         webSettings.setDomStorageEnabled(true);
         webSettings.setLoadsImagesAutomatically(true);
+        webSettings.setSupportMultipleWindows(true);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             webSettings.setAllowFileAccessFromFileURLs(true);
             webSettings.setAllowUniversalAccessFromFileURLs(true);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                webSettings.setMediaPlaybackRequiresUserGesture(false);
+            }
         }
-        
+
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR2) {
             webSettings.setRenderPriority(WebSettings.RenderPriority.HIGH);
         }
@@ -91,6 +100,7 @@ public class WebPlayerView extends WebView {
     @SuppressLint("SetJavaScriptEnabled")
     private void enableJavascript() {
         WebSettings webSettings = getSettings();
+        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         webSettings.setJavaScriptEnabled(true);
     }
 
@@ -122,6 +132,21 @@ public class WebPlayerView extends WebView {
                 }
             }
             return super.onConsoleMessage(consoleMessage);
+        }
+
+        @Override
+        public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, Message resultMsg) {
+            WebView dumbWV = new WebView(view.getContext());
+            dumbWV.setWebViewClient(new WebViewClient() {
+                @Override
+                public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    view.getContext().startActivity(browserIntent);
+                }
+            });
+            ((WebView.WebViewTransport) resultMsg.obj).setWebView(dumbWV);
+            resultMsg.sendToTarget();
+            return true;
         }
 
     }
