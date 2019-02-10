@@ -70,15 +70,8 @@ android {
     }
 }
 
-repositories {
-    maven {
-        url 'https://download.01.org/crosswalk/releases/crosswalk/android/maven2'
-    }
-}
-
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-
     implementation 'com.android.support:appcompat-v7:28.0.0'
 
     zz_crosswalkImplementation 'org.xwalk:xwalk_core_library:23.53.589.4'
