@@ -25,9 +25,9 @@ android {
     def SHOW_FPS            = false // Display the FPS monitor?
     def FORCE_CANVAS        = false // Disables fast WebGL rendering when available
     def FORCE_NO_AUDIO      = false // Disables WebAudio
-    def ANDROID_SDK         = 28 // Android 9 "Pie" API 28
 
-    compileSdkVersion ANDROID_SDK
+    // Android 9 "Pie" API 28
+    compileSdkVersion 28
 
     defaultConfig {
 
@@ -38,7 +38,7 @@ android {
         versionCode 1 // Set this to a higher number for game updates.
         versionName "1.0" // This is the version that the player sees.
 
-        targetSdkVersion ANDROID_SDK
+        targetSdkVersion Integer.valueOf(getCompileSdkVersion().replaceAll("\\D+",""))
     }
 
     buildTypes {
