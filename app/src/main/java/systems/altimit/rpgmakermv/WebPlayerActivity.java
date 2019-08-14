@@ -26,6 +26,8 @@ import android.os.Bundle;
 import android.support.v7.app.AlertDialog;
 import android.util.Base64;
 import android.view.View;
+import android.webkit.WebView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.nio.charset.Charset;
@@ -45,6 +47,13 @@ public class WebPlayerActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if(BuildConfig.DEBUG){
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                WebView.setWebContentsDebuggingEnabled(true);
+            }
+        }
+
         if (BuildConfig.BACK_BUTTON_QUITS) {
             createQuitDialog();
         }
@@ -234,8 +243,22 @@ public class WebPlayerActivity extends Activity {
         }
 
         @Override
+        public void onTriggerEvent(String type) {
+            //these events can be any type, in this case we're just showing an AlertDialog, but it could be an ad
+            if(mPlayer.getContext() instanceof Activity) {
+                new AlertDialog.Builder(mPlayer.getContext())
+                        .setTitle("Event")
+                        .setMessage("Here's where I'd trigger an event of type: " + type)
+                        .setPositiveButton(android.R.string.ok, null)
+                        .show();
+            }else{
+                Toast.makeText(mPlayer.getContext(), "Here's where I'd trigger an event of type: " + type, Toast.LENGTH_SHORT);
+            }
+        }
+
+        @Override
         public void run() {
-            mPlayer.removeJavascriptInterface(INTERFACE);
+            //mPlayer.removeJavascriptInterface(INTERFACE);
             mPlayer.loadUrl(mURIBuilder.build().toString());
         }
 

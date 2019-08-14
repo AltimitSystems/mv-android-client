@@ -35,6 +35,7 @@ public class PlayerHelper {
 
         protected abstract void onStart();
         protected abstract void onPrepare(boolean webgl, boolean webaudio, boolean showfps);
+        protected abstract void onTriggerEvent(String type);
 
         @JavascriptInterface
         public void start() {
@@ -46,6 +47,10 @@ public class PlayerHelper {
             onPrepare(webgl, webaudio, showfps);
         }
 
+        @JavascriptInterface
+        public void triggerEvent(String type){
+            onTriggerEvent(type);
+        }
     }
 
 }
