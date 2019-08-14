@@ -33,12 +33,7 @@
     </string>
 
     <string name="webview_default_page">
-        PCFET0NUWVBFIGh0bWw+CjxodG1sPgo8aGVhZD4KPG1ldGEgY2hhcnNldD1VVEYtOD4KPHN0eWxlPmJvZHl7YmFja2dy
-        b3VuZC1jb2xvcjpibGFja30jY29weXJpZ2h0e3Bvc2l0aW9uOmZpeGVkO2JvdHRvbTowO3JpZ2h0OjA7Y29sb3I6d2hp
-        dGU7Zm9udC1mYW1pbHk6Q29uc29sYXMsTW9uYWNvLEx1Y2lkYSBDb25zb2xlLExpYmVyYXRpb24gTW9ubyxEZWphVnUg
-        U2FucyBNb25vLEJpdHN0cmVhbSBWZXJhIFNhbnMgTW9ubyxDb3VyaWVyIE5ldyxtb25vc3BhY2V9PC9zdHlsZT4KPC9o
-        ZWFkPgo8Ym9keSBvbmxvYWQ9Ym9vdC5zdGFydCgpPgo8ZGl2IGlkPWNvcHlyaWdodD4mIzE2OTsgJiM5MjM7TFRJTUlU
-        IENPTU1VTklUWSBDT05UUklCVVRPUlM8L2Rpdj4KPC9ib2R5Pgo8L2h0bWw+
+        PCFET0NUWVBFIGh0bWw+CjxodG1sPgo8aGVhZD4KPG1ldGEgY2hhcnNldD1VVEYtOD4KPC9oZWFkPgo8Ym9keSBvbmxvYWQ9Ym9vdC5zdGFydCgpPgo8L2JvZHk+CjwvaHRtbD4=
     </string>
 
     <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
