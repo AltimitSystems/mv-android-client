@@ -17,7 +17,7 @@
 apply plugin: 'com.android.application'
 
 android {
-
+    namespace 'com.example.namespace'
     /**
      * Advanced Configuration
      */
@@ -40,6 +40,7 @@ android {
 
         compileSdkVersion ANDROID_SDK_TARGET
         targetSdkVersion ANDROID_SDK_TARGET
+        minSdk 29
     }
 
     buildTypes {
@@ -56,7 +57,7 @@ android {
     productFlavors {
         webview {
             dimension "mv_android_client"
-            minSdkVersion 14
+            minSdk 29
 
             buildConfigField "boolean", "BOOTSTRAP_INTERFACE", "true"
         }
@@ -69,11 +70,13 @@ android {
             buildConfigField "boolean", "BOOTSTRAP_INTERFACE", "true"
         }
     }
+    buildToolsVersion '30.0.3'
+    compileSdk 30
 }
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation 'androidx.appcompat:appcompat:1.0.2'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
 
     zz_crosswalkImplementation 'org.xwalk:xwalk_core_library:23.53.589.4'
 }
